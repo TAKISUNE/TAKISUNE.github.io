@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Observation Form · PCC SHE</title>
+<!-- 6 Oct 2026 · LINE OA intake · TK chose L2 (one long page) + LIFF Full.
+     Public page: holds NO secrets. Identity = LIFF ID token, verified server-side (Line.js). -->
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+/* palette = she-obsgate-appsscript/Form.html (light + dark) */
+:root{
+  --bg:#f2f5f9; --bg2:#e9eef5; --card:#ffffff; --border:#d6dee8; --border2:#c3cedb;
+  --text:#16202c; --text2:#546578; --muted:#66788e; --track:#f1f4f8;
+  --green:#0f8a63; --green-bg:#e2f5ec; --green-text:#0b5c43;
+  --amber:#c98a0b; --amber-bg:#fbf0da; --amber-text:#6b4405;
+  --red:#c0392b; --red-bg:#fcebeb; --red-text:#501313;
+  --accent:#263BAA; --accent-bg:#e6eaf8; --accent-text:#1a2b7d; --accent-ink:#ffffff;
+  --live:#0e7490; --live-bg:#ddf0f5;
+  --shadow:0 1px 2px rgba(16,32,48,.06),0 4px 14px rgba(16,32,48,.05);
+  --r-card:12px; --r-ctl:10px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0d1016; --bg2:#12161f; --card:#161b24; --border:#242c3a; --border2:#333c4d;
+  --text:#e6ebf2; --text2:#9aa4b4; --muted:#68707e; --track:#1c222c;
+  --green:#33c98e; --green-bg:#0f2e24; --green-text:#7fe6bd;
+  --amber:#f0b429; --amber-bg:#33290f; --amber-text:#f0c674;
+  --red:#e8574a; --red-bg:#361a17; --red-text:#f3a29a;
+  --accent:#7B8FF5; --accent-bg:#1f2547; --accent-text:#b6c1fb; --accent-ink:#0d1130;
+  --live:#22d3ee; --live-bg:#0e3038;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.3);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;display:flex;flex-direction:column;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Thai",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.appbar{flex:none;background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 14px;padding-top:calc(9px + env(safe-area-inset-top))}
+.who{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;min-height:20px}
+.who .vf{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:99px;background:var(--green-bg);color:var(--green-text);border:1px solid var(--green)}
+.who .frac{margin-left:auto;font-size:10.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.prog{margin-top:7px;height:2px;background:var(--track);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--live);transition:width .25s}
+.scr{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.body{padding:12px 14px 22px;max-width:640px;margin:0 auto}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mode button{all:unset;cursor:pointer;text-align:center;padding:12px 8px;border-radius:var(--r-ctl);border:1px solid var(--border2);background:var(--card);font-size:13px;font-weight:800;letter-spacing:.05em;color:var(--text2)}
+.mode .on.find{border-color:var(--live);background:var(--live-bg);color:var(--live)}
+.mode .on.gp{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.sh{display:flex;align-items:center;gap:9px;padding:12px 12px 8px}
+.sh .no{width:21px;height:21px;flex:0 0 21px;border-radius:50%;border:1px solid var(--border2);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--text2)}
+.card.done .sh .no{background:var(--green-bg);border-color:var(--green);color:var(--green-text)}
+.sh .tt{font-size:13px;font-weight:700}
+.sh .tt small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.sb{padding:4px 12px 14px}
+.f{display:block;margin-bottom:13px}
+.f:last-child{margin-bottom:0}
+.lb{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--text2);margin-bottom:6px}
+.lb .rq{color:var(--red);margin-right:4px}
+.lb .th{display:block;letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted);font-size:11px;margin-top:1px}
+.lb .cnt{float:right;letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted);font-size:10.5px}
+.lb .cnt.low{color:var(--amber-text)}
+.inp{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-ctl);padding:11px;font-size:16px;font-family:inherit;-webkit-appearance:none;appearance:none}
+select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--text2) 50%),linear-gradient(135deg,var(--text2) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:32px}
+textarea.inp{min-height:92px;resize:vertical}
+.inp:focus{outline:2px solid var(--accent);outline-offset:-2px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tile{all:unset;cursor:pointer;box-sizing:border-box;padding:12px 8px;border-radius:var(--r-ctl);border:1px solid var(--border2);background:var(--bg2);font-size:13px;font-weight:700;text-align:center;display:flex;flex-direction:column;gap:2px;align-items:center;color:var(--text)}
+.tile small{font-size:10.5px;font-weight:600;color:var(--muted)}
+.tile.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent-text)}
+.tile.on small{color:var(--accent-text)}
+.tile.dim{opacity:.42;cursor:not-allowed}
+.phd{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--text2);margin:0 0 7px}
+.shot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.slot{aspect-ratio:1;border:1px dashed var(--border2);border-radius:var(--r-ctl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bg2);cursor:pointer;color:var(--muted);position:relative;overflow:hidden;font-size:12.5px;font-weight:700;text-align:center}
+.slot .ic{font-size:22px}
+.slot.has{border:1px solid var(--green)}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot .x{all:unset;cursor:pointer;position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;text-align:center;line-height:24px;font-size:14px;z-index:2}
+.reqtag{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:var(--red-bg);color:var(--red-text);padding:2px 6px;border-radius:2px}
+.hint{display:block;font-size:11.5px;color:var(--muted);margin-top:6px}
+.hint.ok{color:var(--green-text)}
+.gpskip{border:1px dashed var(--border2);border-radius:var(--r-card);background:var(--bg2);padding:12px;font-size:12px;color:var(--muted)}
+.foot{flex:none;background:var(--bg2);border-top:1px solid var(--border);padding:9px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.slim{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--track);font-size:12px;color:var(--text2)}
+.slim b{color:var(--amber-text);flex:none}
+.slim span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slim u{text-decoration:none;color:var(--accent-text);font-weight:800;font-size:10px;letter-spacing:.06em}
+.slim.ok{background:var(--green-bg);color:var(--green-text)}
+.slim.ok b{color:var(--green-text)}
+.btn{all:unset;cursor:pointer;box-sizing:border-box;display:block;width:100%;text-align:center;padding:14px 10px;border-radius:var(--r-ctl);background:var(--accent);color:var(--accent-ink);font-size:15px;font-weight:800}
+.btn[aria-disabled="true"]{opacity:.38;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.screen{padding:28px 18px;max-width:520px;margin:0 auto;text-align:center}
+.screen h2{font-size:18px;margin:10px 0 6px}
+.screen p{color:var(--text2);font-size:14px;margin:0 0 14px}
+.screen .big{font-size:40px}
+.screen .inp{text-align:left;margin-bottom:10px}
+.err{background:var(--red-bg);color:var(--red-text);border-radius:var(--r-ctl);padding:10px 12px;font-size:13px;margin:0 0 12px;text-align:left}
+.note{background:var(--amber-bg);color:var(--amber-text);border-radius:var(--r-ctl);padding:9px 12px;font-size:12.5px;margin:0 0 12px}
+.spin{width:30px;height:30px;border:3px solid var(--accent-bg);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:20}
+.overlay.show{display:flex}
+.overlay .box{background:var(--card);border-radius:14px;padding:22px 26px;text-align:center;font-weight:800;color:var(--accent-text);min-width:200px}
+.overlay .box small{display:block;font-weight:600;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="appbar" id="appbar" hidden>
+  <div class="who" id="who"></div>
+  <div class="prog"><i id="progbar"></i></div>
+</div>
+<div class="scr" id="scr"><div class="body" id="body"><div class="screen"><div class="spin"></div><p style="margin-top:12px">กำลังเปิดฟอร์ม…</p></div></div></div>
+<div class="foot" id="foot" hidden></div>
+<div class="overlay" id="overlay"><div class="box"><div class="spin"></div><div style="margin-top:10px" id="ovtxt">Sending…</div><small id="ovsub"></small></div></div>
+<input type="file" id="picker" accept="image/*" multiple hidden>
+
+<script>
+/* ---------------- config (none of these are secrets) ---------------- */
+var LIFF_ID  = '2011753283-aXvW2oCZ';
+var API      = 'https://script.google.com/macros/s/AKfycbyABXSxD4f4ZWa1pY74N5lzyc2pYDZiXllVwTR8GKsPtqeGhDi58YrLhQ03wTfkDUgk/exec';
+var MAXP     = 4;          /* photos per group — same as obsform */
+var SHRINK   = 2048;       /* TK 26 Sep: LINE-like quality, still fast from site */
+var JPEGQ    = 0.80;
+var OTYPES   = [['ua','Unsafe Action','การกระทำไม่ปลอดภัย'],['uc','Unsafe Condition','สภาพการณ์ไม่ปลอดภัย'],
+                ['env','Environment Impact','มีผลกระทบต่อสิ่งแวดล้อม'],['oth','Other','อื่นๆ — ระบุ']];
+var LS_DRAFT = 'line_obs_draft_v1', LS_OUT = 'line_obs_outbox_v1';
+
+var BOOT = null, TOKEN = '', S = null, SENDING = false;
+
+/* ---------------- small helpers ---------------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(iso){if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||''))return '';var p=iso.split('-');return Number(p[2])+' '+MON[+p[1]-1]+' '+p[0];}
+function dueDate(n){var d=new Date((S.date||BOOT.today).replace(/-/g,'/'));d.setDate(d.getDate()+n);return d.getDate()+' '+MON[d.getMonth()];}
+function blank(){return {mode:'find',date:BOOT.today,area:'',subArea:'',otherSub:'',company:'',otherCo:'',loc:'',otype:'',otherType:'',
+  found:'',rec:'',due:1,pf:[],pa:[]};}
+
+function api(action, extra){
+  var body = Object.assign({liff:1, action:action, idToken:TOKEN}, extra||{});
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'})
+    .then(function(r){return r.json();});
+}
+
+/* ---------------- start ---------------- */
+function start(){
+  liff.init({liffId:LIFF_ID}).then(function(){
+    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
+    TOKEN = liff.getIDToken() || '';
+    return api('boot').then(onBoot);
+  }).catch(function(e){screenError('เปิดฟอร์มไม่สำเร็จ',String(e&&e.message||e));});
+}
+function onBoot(r){
+  if(!r||!r.ok){screenError('เปิดฟอร์มไม่สำเร็จ',(r&&r.error)||'no response');return;}
+  if(r.status==='unbound'){screenBind(r.lineName);return;}
+  if(r.status==='pending'){screenPending(r.officer);return;}
+  if(r.status==='rejected'){screenError('บัญชี LINE นี้ยังใช้ฟอร์มไม่ได้','แจ้ง TK เพื่อตรวจสอบ');return;}
+  BOOT=r.boot;
+  var d=lsGet(LS_DRAFT,null);
+  S=(d&&d.v===1)?Object.assign(blank(),d.s):blank();
+  $('appbar').hidden=false;$('foot').hidden=false;
+  render();
+  flushOutbox();
+}
+
+/* ---------------- non-form screens ---------------- */
+function bare(html){$('appbar').hidden=true;$('foot').hidden=true;$('body').innerHTML='<div class="screen">'+html+'</div>';}
+function screenError(t,msg){bare('<div class="big">⚠️</div><h2>'+esc(t)+'</h2><div class="err">'+esc(msg)+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button>');}
+function screenPending(name){bare('<div class="big">⏳</div><h2>รอ TK อนุมัติ</h2><p>ส่งคำขอผูกบัญชีเป็น <b>'+esc(name||'')+'</b> แล้ว<br>พอ TK อนุมัติ เปิดฟอร์มอีกครั้งก็ใช้ได้เลย (ทำครั้งเดียว)</p><button class="btn ghost" onclick="location.reload()">เช็คอีกครั้ง</button>');}
+function screenBind(lineName,err){
+  bare('<div class="big">👋</div><h2>ครั้งแรก — ผูกบัญชีก่อนนะคะ</h2>'+
+    '<p>LINE: <b>'+esc(lineName||'')+'</b><br>พิมพ์อีเมล Google ที่ใช้กับ PCC SHE Workspace (อีเมลเดียวกับที่ลงทะเบียนกับ TK)</p>'+
+    (err?'<div class="err">'+esc(err)+'</div>':'')+
+    '<input class="inp" id="bindEmail" type="email" autocomplete="email" inputmode="email" placeholder="name@gmail.com">'+
+    '<button class="btn" id="bindBtn">ส่งคำขอ</button>');
+  $('bindBtn').onclick=function(){
+    var em=($('bindEmail').value||'').trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){screenBind(lineName,'รูปแบบอีเมลไม่ถูกต้อง');return;}
+    $('bindBtn').setAttribute('aria-disabled','true');$('bindBtn').textContent='กำลังส่ง…';
+    api('bind',{email:em}).then(function(r){
+      if(!r||!r.ok){screenBind(lineName,(r&&r.error)||'ส่งไม่สำเร็จ');return;}
+      if(r.status==='approved'){location.reload();return;}
+      screenPending(r.officer);
+    }).catch(function(e){screenBind(lineName,'เน็ตไม่เสถียร ลองอีกครั้ง ('+e+')');});
+  };
+}
+
+/* ---------------- validation ---------------- */
+function gp(){return S.mode==='gp';}
+function coName(){return S.company==='__other'?S.otherCo.trim():S.company;}
+function missingList(){
+  var m=[];
+  if(!S.area)m.push(['area','Area · พื้นที่']);
+  if(!coName())m.push(['company','Company · บริษัท']);
+  if(!gp()&&!(S.otype&&(S.otype!=='oth'||S.otherType.trim())))m.push(['otype','Observation type · ลักษณะที่พบ']);
+  if(!S.pf.length)m.push(['photo','Photo — Found · รูป']);
+  if(S.found.trim().length<10)m.push(['found','What you found · สิ่งที่พบ (10+)']);
+  if(!gp()&&S.rec.trim().length<10)m.push(['rec','Recommendation · ข้อเสนอแนะ (10+)']);
+  return m;
+}
+function secDone(i){
+  if(i===0)return !!(S.area&&coName());
+  if(i===1)return gp()||!!(S.otype&&(S.otype!=='oth'||S.otherType.trim()));
+  if(i===2)return S.pf.length>0;
+  return S.found.trim().length>=10&&(gp()||S.rec.trim().length>=10);
+}
+
+/* ---------------- form (L2: one long page, every section open) ---------------- */
+function head(i,en,th){return '<div class="sh"><span class="no">'+(secDone(i)?'✓':(i+1))+'</span><span class="tt">'+en+'<small>'+th+'</small></span></div>';}
+function cnt(v){var n=v.trim().length;return '<span class="cnt'+(n<10?' low':'')+'">'+n+'/10</span>';}
+function secWhere(){
+  var sub='';
+  if(S.area==='BOP'){
+    var opt=function(v,l){return '<option value="'+esc(v)+'"'+(S.subArea===v?' selected':'')+'>'+esc(l||v)+'</option>';};
+    sub='<label class="f"><span class="lb">BOP Area<span class="th">พื้นที่ย่อย · ไม่บังคับ</span></span><select class="inp" data-b="subArea"><option value="">— select —</option>'+
+      '<optgroup label="TANK Laydown Area">'+opt('TANK Laydown Area')+'</optgroup><optgroup label="BOP">'+
+      (BOOT.subAreas||[]).map(function(x){return opt(x);}).join('')+opt('Other','Other / อื่นๆ — ระบุ')+'</optgroup></select></label>'+
+      (S.subArea==='Other'?'<label class="f"><input class="inp" data-b="otherSub" value="'+esc(S.otherSub)+'" placeholder="Type the area name"></label>':'');
+  }
+  return '<div class="card'+(secDone(0)?' done':'')+'" id="sec-area">'+head(0,'Where &amp; who','วันที่ · พื้นที่ · บริษัท')+'<div class="sb">'+
+    '<label class="f"><span class="lb"><span class="rq">*</span>Report date<span class="th">วันที่พบ (วันที่เห็นจริง)</span></span><input class="inp" type="date" data-b="date" max="'+BOOT.today+'" value="'+S.date+'"></label>'+
+    '<div class="f"><span class="lb"><span class="rq">*</span>Area<span class="th">พื้นที่</span></span><div class="tiles">'+
+      BOOT.areas.map(function(a){return '<button type="button" class="tile'+(S.area===a?' on':'')+'" data-area="'+esc(a)+'">'+esc(a)+'</button>';}).join('')+'</div></div>'+sub+
+    '<label class="f" id="sec-company"><span class="lb"><span class="rq">*</span>Company<span class="th">บริษัท</span></span><select class="inp" data-b="company"><option value="">— select —</option>'+
+      BOOT.companies.map(function(c){return '<option value="'+esc(c)+'"'+(S.company===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+
+      '<option value="__other"'+(S.company==='__other'?' selected':'')+'>Other — type a name</option></select></label>'+
+    (S.company==='__other'?'<label class="f"><input class="inp" data-b="otherCo" value="'+esc(S.otherCo)+'" placeholder="Type the company name"></label>':'')+
+    '<label class="f"><span class="lb">Specific location<span class="th">บริเวณที่พบ · ไม่บังคับ</span></span><input class="inp" data-b="loc" value="'+esc(S.loc)+'" placeholder="e.g. Roof rafter plate, Access tower B"></label>'+
+    '</div></div>';
+}
+function secType(){
+  var inner=gp()?'<div class="gpskip">Good Practice ไม่ต้องระบุลักษณะ</div>':
+    '<div class="tiles">'+OTYPES.map(function(o){return '<button type="button" class="tile'+(S.otype===o[0]?' on':'')+'" data-ot="'+o[0]+'">'+o[1]+'<small>'+o[2]+'</small></button>';}).join('')+'</div>'+
+    (S.otype==='oth'?'<input class="inp" style="margin-top:9px" data-b="otherType" value="'+esc(S.otherType)+'" placeholder="ระบุลักษณะที่พบ">':'');
+  return '<div class="card'+(secDone(1)?' done':'')+'" id="sec-otype">'+head(1,'Observation type','ลักษณะที่พบ')+'<div class="sb">'+inner+'</div></div>';
+}
+function group(g,arr,label,req){
+  var h=arr.map(function(src,i){return '<div class="slot has"><img src="'+src+'" alt=""><button type="button" class="x" data-del="'+g+'" data-i="'+i+'">&times;</button></div>';}).join('');
+  if(arr.length<MAXP)h+='<div class="slot" data-cam="'+g+'"><span class="ic">📷</span>'+label+(req&&!arr.length?'<span class="reqtag">required</span>':'')+'</div>';
+  return '<div class="phd">'+label+'<span>'+arr.length+'/'+MAXP+'</span></div><div class="shot">'+h+'</div>';
+}
+function secPhoto(){
+  return '<div class="card'+(secDone(2)?' done':'')+'" id="sec-photo">'+head(2,'Photos','รูปภาพ')+'<div class="sb">'+
+    group('F',S.pf,'Photo — Found',true)+(gp()?'':group('A',S.pa,'Photo — After',false))+
+    '<span class="hint">ถ่ายใหม่หรือเลือกจากอัลบั้มได้ · สูงสุด '+MAXP+' รูปต่อช่อง</span></div></div>';
+}
+function secDetail(){
+  var dues=[[0,'Already closed',S.pa.length?'ปิดแล้ว · แก้จบหน้างาน':'ต้องมีรูป After ก่อน'],[1,'Tomorrow',dueDate(1)],[2,'+2 days',dueDate(2)],[3,'+3 days',dueDate(3)]];
+  return '<div class="card'+(secDone(3)?' done':'')+'" id="sec-found">'+head(3,'Details &amp; close due','รายละเอียด · กำหนดปิด')+'<div class="sb">'+
+    '<label class="f"><span class="lb"><span class="rq">*</span>What you found'+cnt(S.found)+'<span class="th">สิ่งที่พบ · พิมพ์ไทยได้ ระบบแปลให้</span></span><textarea class="inp" data-b="found" placeholder="e.g. พบนั่งร้านไม่มีป้ายตรวจสอบติดอยู่">'+esc(S.found)+'</textarea></label>'+
+    (gp()?'':'<label class="f" id="sec-rec"><span class="lb"><span class="rq">*</span>Recommendation'+cnt(S.rec)+'<span class="th">ข้อเสนอแนะ</span></span><textarea class="inp" data-b="rec" placeholder="สิ่งที่ต้องแก้ไข และวิธีป้องกันไม่ให้เกิดซ้ำ">'+esc(S.rec)+'</textarea></label>')+
+    '<div class="f"><span class="lb">Close due<span class="th">กำหนดปิดงาน'+(gp()?' · Good Practice ไม่ต้องปิด':'')+'</span></span><div class="tiles">'+
+      dues.map(function(d){var lock=gp()||(d[0]===0&&!S.pa.length);return '<button type="button" class="tile'+(!gp()&&S.due===d[0]?' on':'')+(lock?' dim':'')+'" data-due="'+d[0]+'">'+d[1]+'<small>'+d[2]+'</small></button>';}).join('')+
+    '</div>'+(!gp()&&S.due===0?'<span class="hint ok">แก้ไขจบหน้างานแล้ว — ระบบจะปิดรายการให้เลย</span>':'')+'</div>'+
+    '</div></div>';
+}
+function render(){
+  var me=BOOT.me||{};
+  $('who').innerHTML=esc(me.nick||me.name||'')+' <span class="vf">verified · LINE</span><span class="frac" id="frac"></span>';
+  $('body').innerHTML=
+    '<div class="mode"><button type="button" class="find'+(gp()?'':' on')+'" data-mode="find">FINDING</button><button type="button" class="gp'+(gp()?' on':'')+'" data-mode="gp">GOOD PRACTICE</button></div>'+
+    '<div id="outnote"></div>'+secWhere()+secType()+secPhoto()+secDetail();
+  renderFoot();
+  showOutboxNote();
+}
+function renderFoot(){
+  var m=missingList(), done=[0,1,2,3].filter(secDone).length;
+  $('frac').textContent=done+'/4';
+  $('progbar').style.width=(done/4*100)+'%';
+  var ok=!m.length;
+  $('foot').innerHTML='<button type="button" class="slim'+(ok?' ok':'')+'" id="slim"><b>'+(ok?'✓ Ready':m.length+' left')+'</b><span>'+
+    (ok?'ครบแล้ว ส่งได้เลย':esc(m[0][1]))+'</span>'+(ok?'':'<u>GO ›</u>')+'</button>'+
+    '<button type="button" class="btn" id="send" aria-disabled="'+(!ok||SENDING)+'">Send · ส่ง</button>';
+}
+function saveDraft(){lsSet(LS_DRAFT,{v:1,s:Object.assign({},S,{pf:[],pa:[]})});}   /* photos not kept: too big for storage */
+
+/* re-render while typing without losing the caret */
+function rerenderKeepFocus(){
+  var a=document.activeElement,key=a&&a.dataset?a.dataset.b:null,pos=null;
+  try{pos=a.selectionStart;}catch(e){}
+  render();
+  if(key){var e2=document.querySelector('[data-b="'+key+'"]');if(e2){e2.focus();try{if(pos!=null)e2.setSelectionRange(pos,pos);}catch(x){}}}
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('button,[data-cam]');if(!t||!S)return;
+  if(t.dataset.mode){S.mode=t.dataset.mode;if(gp()&&S.due===0)S.due=1;saveDraft();render();return;}
+  if(t.dataset.area){S.area=t.dataset.area;if(S.area!=='BOP'){S.subArea='';S.otherSub='';}saveDraft();render();return;}
+  if(t.dataset.ot){S.otype=t.dataset.ot;saveDraft();render();return;}
+  if(t.dataset.due!==undefined){if(t.classList.contains('dim'))return;S.due=+t.dataset.due;saveDraft();render();return;}
+  if(t.dataset.cam){PICK=t.dataset.cam;$('picker').value='';$('picker').click();return;}
+  if(t.dataset.del){var arr=t.dataset.del==='F'?S.pf:S.pa;arr.splice(+t.dataset.i,1);if(!S.pa.length&&S.due===0)S.due=1;render();return;}
+  if(t.id==='slim'){var m=missingList();if(m.length)jump(m[0][0]);return;}
+  if(t.id==='send'){if(t.getAttribute('aria-disabled')==='true'){var mm=missingList();if(mm.length)jump(mm[0][0]);return;}send();return;}
+});
+document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.b;if(!k||!S)return;S[k]=e.target.value;saveDraft();
+  if(e.target.tagName==='SELECT')render();else{renderFoot();var c=e.target.closest('.card');if(c){var i=['sec-area','sec-otype','sec-photo','sec-found'].indexOf(c.id);if(i>=0){c.classList.toggle('done',secDone(i));c.querySelector('.no').textContent=secDone(i)?'✓':(i+1);}}
+    var lb=e.target.closest('label');var ct=lb&&lb.querySelector('.cnt');if(ct){var n=e.target.value.trim().length;ct.textContent=n+'/10';ct.classList.toggle('low',n<10);}}});
+/* change re-renders ONLY for the date (due labels count from it). Text fields must not re-render on blur:
+   tapping the next field fires 'change' on the previous one, and a re-render would swap the field
+   the person just tapped for a new copy — the keyboard closes and what they type goes nowhere. */
+document.addEventListener('change',function(e){var k=e.target.dataset&&e.target.dataset.b;if(!k||!S)return;S[k]=e.target.value;saveDraft();if(k==='date')render();});
+/* L2 cost (long page + keyboard): keep the field being typed in the middle of the screen */
+document.addEventListener('focusin',function(e){if(e.target.matches('.inp')){setTimeout(function(){try{e.target.scrollIntoView({block:'center',behavior:'smooth'});}catch(x){}},250);}});
+function jump(k){
+  var map={area:'sec-area',company:'sec-company',otype:'sec-otype',photo:'sec-photo',found:'sec-found',rec:'sec-rec'};
+  var el=$(map[k]);if(!el)return;el.scrollIntoView({block:'start',behavior:'smooth'});
+  var f=el.querySelector('textarea,select');if(f&&(k==='found'||k==='rec'||k==='company'))setTimeout(function(){f.focus();},350);
+}
+
+/* ---------------- photos ---------------- */
+var PICK='F';
+$('picker').addEventListener('change',function(){
+  var files=[].slice.call(this.files||[]);if(!files.length)return;
+  var arr=PICK==='F'?S.pf:S.pa, room=MAXP-arr.length;
+  files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);});});},Promise.resolve())
+    .then(function(){render();});
+});
+function shrink(file){
+  return new Promise(function(res){
+    var fr=new FileReader();
+    fr.onload=function(){var img=new Image();img.onload=function(){
+      var w=img.width,h=img.height,r=Math.min(1,SHRINK/Math.max(w,h));w=Math.round(w*r);h=Math.round(h*r);
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+      res(cv.toDataURL('image/jpeg',JPEGQ));};img.onerror=function(){res(null);};img.src=fr.result;};
+    fr.onerror=function(){res(null);};fr.readAsDataURL(file);
+  });
+}
+
+/* ---------------- send ---------------- */
+function otypeLabel(){if(gp())return 'Good Practice';if(S.otype==='oth')return S.otherType.trim();return (OTYPES.filter(function(o){return o[0]===S.otype;})[0]||[])[1]||'';}
+function payload(){
+  var sub=S.area==='BOP'?(S.subArea==='Other'?(S.otherSub.trim()||'Other'):S.subArea):'';
+  return {reportDate:S.date, company:coName(), area:S.area, subArea:sub, loc:S.loc.trim(),
+    cls:gp()?'Good Practice':'Observation', otype:otypeLabel(), cat:'', sub:'',
+    desc:S.found.trim(), rec:gp()?'':S.rec.trim(), due:gp()?0:S.due, closedNow:!gp()&&S.due===0,
+    photos:S.pf.slice(), photosAfter:gp()?[]:S.pa.slice(), photoAfter:gp()?'':(S.pa[0]||''), repeat:1, repeatNote:''};
+}
+function overlay(on,txt,sub){$('overlay').classList.toggle('show',!!on);if(txt)$('ovtxt').textContent=txt;$('ovsub').textContent=sub||'';}
+function send(){
+  if(SENDING)return;SENDING=true;renderFoot();
+  var p=payload();
+  overlay(true,'Sending…','กำลังส่ง '+(p.photos.length+p.photosAfter.length)+' รูป');
+  api('submit',{payload:p}).then(function(r){
+    if(!r||!r.ok){SENDING=false;overlay(false);renderFoot();alertBox('ส่งไม่สำเร็จ: '+((r&&r.error)||'no response'));return;}
+    afterSent(r.data,p);
+  }).catch(function(){
+    /* network: keep it on the phone, send itself next time */
+    var out=lsGet(LS_OUT,[]);out.push(p);
+    if(!lsSet(LS_OUT,out)){SENDING=false;overlay(false);renderFoot();alertBox('เน็ตหลุด และเครื่องเก็บร่างไม่ได้ (รูปใหญ่เกิน) — ลองกด Send อีกครั้งเมื่อมีสัญญาณ');return;}
+    SENDING=false;overlay(false);S=blank();saveDraft();render();
+    alertBox('เน็ตหลุด — เก็บไว้ในเครื่องแล้ว จะส่งเองตอนเปิดฟอร์มครั้งหน้าที่มีสัญญาณ',true);
+  });
+}
+function afterSent(d,p){
+  var id=(d&&d.id)||'';
+  S=blank();saveDraft();SENDING=false;
+  var text='✅ ส่ง Observation แล้ว\n'+id+' · '+p.area+' · '+p.company;
+  var close=function(){overlay(false);if(liff.isInClient()){liff.closeWindow();}else{bare('<div class="big">✅</div><h2>ส่งแล้ว</h2><p>'+esc(id)+'</p><button class="btn" onclick="location.reload()">ส่งอีกเรื่อง</button>');}};
+  overlay(true,'✓ Sent',id);
+  /* the user's own message in the OA chat → webhook replies with the RECEIVED card (reply = free) */
+  if(liff.isInClient()&&liff.getContext()&&liff.getContext().type!=='none'){
+    liff.sendMessages([{type:'text',text:text}]).then(function(){setTimeout(close,500);}).catch(function(){setTimeout(close,900);});
+  }else setTimeout(close,900);
+}
+function alertBox(msg,soft){var n=$('outnote');if(!n)return;n.innerHTML='<div class="'+(soft?'note':'err')+'">'+esc(msg)+'</div>';$('scr').scrollTop=0;}
+function showOutboxNote(){var out=lsGet(LS_OUT,[]);if(out.length&&$('outnote')&&!$('outnote').innerHTML)$('outnote').innerHTML='<div class="note">มี '+out.length+' รายการค้างส่งในเครื่อง — กำลังส่งให้อัตโนมัติ</div>';}
+function flushOutbox(){
+  var out=lsGet(LS_OUT,[]);if(!out.length)return;
+  var p=out[0];
+  api('submit',{payload:p}).then(function(r){
+    if(r&&r.ok){out.shift();lsSet(LS_OUT,out);$('outnote').innerHTML='<div class="note" style="background:var(--green-bg);color:var(--green-text)">ส่งรายการที่ค้างแล้ว · '+esc(r.data&&r.data.id||'')+'</div>';if(out.length)flushOutbox();}
+  }).catch(function(){});
+}
+
+start();
+</script>
+</body>
+</html>
