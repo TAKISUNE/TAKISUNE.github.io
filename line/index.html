@@ -143,6 +143,45 @@ textarea.inp{min-height:92px;resize:vertical}
 .rpt textarea.inp{min-height:64px;margin-top:2px}
 .qact{display:flex;gap:7px;margin-top:9px}
 .qact button{all:unset;cursor:pointer;font-size:12px;font-weight:700;color:var(--accent-text);padding:4px 10px;border:1px solid var(--border2);border-radius:7px}
+
+/* ---- photo editor (D1 + E1, 7 Oct 2026) ---- */
+.slot .edbtn{all:unset;cursor:pointer;position:absolute;inset:0;z-index:1;display:flex;align-items:flex-end;padding:6px}
+.slot .edbtn span{background:rgba(22,32,44,.82);color:#fff;font-size:11.5px;font-weight:800;padding:5px 9px;border-radius:99px}
+.slot .edtag{position:absolute;top:6px;left:6px;z-index:2;background:#0f8a63;color:#fff;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:4px;pointer-events:none}
+#pe{position:fixed;inset:0;background:#0b0f15;display:none;flex-direction:column;z-index:200;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
+#pe.on{display:flex}
+#pe>*{width:100%;max-width:480px;align-self:center}
+#pebar{flex:none;background:#0d1219;padding-top:env(safe-area-inset-top);border-bottom:1px solid #1d2430}
+.pe-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px}
+.pe-hdr .l,.pe-hdr .r{flex:1;display:flex}.pe-hdr .r{justify-content:flex-end}
+.pe-cancel{all:unset;cursor:pointer;font-size:15px;font-weight:700;color:#e8ecf3;padding:8px 6px}
+.pe-ur{display:flex;gap:10px;align-items:center}
+.pe-ur button{all:unset;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;color:#fff;border-radius:8px}
+.pe-ur button svg{width:24px;height:24px}
+.pe-ur button[disabled]{color:#4a5363;cursor:default}
+.pe-dv{width:1px;height:22px;background:#2a3240;margin:0 2px}
+.pe-done{all:unset;cursor:pointer;background:#7B8FF5;color:#0d1130;font-size:15px;font-weight:800;padding:10px 20px;border-radius:6px}
+.pe-tools{display:flex;padding:4px 10px 6px}
+.pe-tl{all:unset;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;color:#aab3c2;font-size:11.5px;font-weight:700;padding:8px 0 7px;border-radius:6px}
+.pe-tl svg{width:22px;height:22px}
+.pe-tl.on{background:#1e2650;color:#fff}.pe-tl.on svg{color:#9fb0ff}
+.pe-style{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px;gap:10px}
+.pe-cols{display:flex;gap:16px}
+.pe-sw{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%}
+.pe-sw.on{box-shadow:0 0 0 3px #0d1219,0 0 0 5px #fff}
+.pe-seg{display:flex;border:1px solid #2a3240;border-radius:6px;overflow:hidden;background:#141a23}
+.pe-seg button{all:unset;cursor:pointer;width:46px;height:38px;display:grid;place-items:center}
+.pe-seg button+button{border-left:1px solid #2a3240}
+.pe-seg button i{display:block;width:16px;background:#c5cddb;border-radius:2px}
+.pe-seg button.on{background:#222b55}.pe-seg button.on i{background:#fff}
+#pestage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#16191f;padding-bottom:env(safe-area-inset-bottom)}
+#pecv{max-width:100%;max-height:100%;touch-action:none}
+#pecrop{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:none;justify-content:center;gap:10px}
+#pecrop.on{display:flex}
+#pecrop button{all:unset;cursor:pointer;padding:10px 18px;border-radius:6px;font-weight:800;font-size:14px;background:rgba(255,255,255,.14);color:#fff}
+#pecrop .ok{background:#7B8FF5;color:#0d1130}
+#petoast{position:absolute;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);color:#16202c;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#petoast.on{opacity:1}
 </style>
 </head>
 <body>
@@ -153,6 +192,9 @@ textarea.inp{min-height:92px;resize:vertical}
 <div class="foot" id="foot" hidden></div>
 <div class="overlay" id="overlay"><div class="box"><div class="spin"></div><div style="margin-top:10px" id="ovtxt">Sending…</div><small id="ovsub"></small></div></div>
 <input type="file" id="picker" accept="image/*" multiple hidden>
+<div id="pe" aria-modal="true" role="dialog"><div id="pebar"></div>
+  <div id="pestage"><canvas id="pecv"></canvas><div id="petoast"></div>
+    <div id="pecrop"><button type="button" id="pecropNo">ยกเลิก</button><button type="button" class="ok" id="pecropOk">✓ ครอป</button></div></div></div>
 
 <script>
 /* ---------------- config (none of these are secrets) ---------------- */
@@ -176,7 +218,7 @@ var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
 function fmtDate(iso){if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||''))return '';var p=iso.split('-');return Number(p[2])+' '+MON[+p[1]-1]+' '+p[0];}
 function dueDate(n){var d=new Date((S.date||BOOT.today).replace(/-/g,'/'));d.setDate(d.getDate()+n);return d.getDate()+' '+MON[d.getMonth()];}
 function blank(){return {mode:'find',date:BOOT.today,area:'',subArea:'',otherSub:'',company:'',otherCo:'',loc:'',otype:'',otherType:'',
-  found:'',rec:'',due:1,pf:[],pa:[]};}
+  found:'',rec:'',due:1,pf:[],pa:[],pfx:[],pax:[]};}
 
 function api(action, extra){
   var body = Object.assign({liff:1, action:action, idToken:TOKEN}, extra||{});
@@ -303,7 +345,7 @@ function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open('li
 function idbGet(k){return new Promise(function(res){if(!IDB)return res(null);try{var q=IDB.transaction('kv').objectStore('kv').get(k);q.onsuccess=function(){res(q.result||null);};q.onerror=function(){res(null);};}catch(e){res(null);}});}
 function idbPut(k,v){if(!IDB)return;try{IDB.transaction('kv','readwrite').objectStore('kv').put(v,k);}catch(e){}}
 var _dT=null;
-function saveDraft(){lsSet(LS_DRAFT,{v:1,s:Object.assign({},S,{pf:[],pa:[]})});clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
+function saveDraft(){lsSet(LS_DRAFT,{v:1,s:Object.assign({},S,{pf:[],pa:[],pfx:[],pax:[]})});clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
 function saveQueue(){idbPut('queue',QUEUE);}
 
 /* ---------------- validation ---------------- */
@@ -361,14 +403,17 @@ function secType(){
     (S.otype==='oth'?'<input class="inp" style="margin-top:9px" data-b="otherType" value="'+esc(S.otherType)+'" placeholder="ระบุลักษณะที่พบ">':'')+'</div></div>';
 }
 function group(g,arr,label,req){
-  var h=arr.map(function(src,i){return '<div class="slot has"><img src="'+src+'" alt=""><button type="button" class="x" data-del="'+g+'" data-i="'+i+'">&times;</button></div>';}).join('');
+  var mx=metaArr(g);
+  var h=arr.map(function(src,i){return '<div class="slot has"><img src="'+src+'" alt="">'+(mx[i]?'<span class="edtag">✓ Edited</span>':'')+
+    '<button type="button" class="edbtn" data-ed="'+g+'" data-i="'+i+'"><span>✎ '+(mx[i]?'แก้อีกรอบ':'แก้รูป')+'</span></button>'+
+    '<button type="button" class="x" data-del="'+g+'" data-i="'+i+'">&times;</button></div>';}).join('');
   if(arr.length<MAXP)h+='<div class="slot" data-cam="'+g+'"><span class="ic">📷</span>'+label+(req&&!arr.length?'<span class="reqtag">required</span>':'')+'</div>';
   return '<div class="phd">'+label+'<span>'+arr.length+'/'+MAXP+'</span></div><div class="shot">'+h+'</div>';
 }
 function secPhoto(){
   return '<div class="card'+(secDone('photo')?' done':'')+'" id="sec-photo">'+head('photo','Photos','รูปภาพ')+'<div class="sb">'+
     group('F',S.pf,'Photo — Found',true)+(gp()?'':group('A',S.pa,'Photo — After',false))+
-    '<span class="hint">ถ่ายใหม่หรือเลือกจากอัลบั้มได้ · สูงสุด '+MAXP+' รูปต่อช่อง</span></div></div>';
+    '<span class="hint">ถ่ายใหม่หรือเลือกจากอัลบั้มได้ · สูงสุด '+MAXP+' รูปต่อช่อง · แตะรูปเพื่อตีกรอบ / ครอป</span></div></div>';
 }
 function secDetail(){
   var dues=[[0,'Already closed',S.pa.length?'ปิดแล้ว · แก้จบหน้างาน':'ต้องมีรูป After ก่อน'],[1,'Tomorrow',dueDate(1)],[2,'+2 days',dueDate(2)],[3,'+3 days',dueDate(3)]];
@@ -440,7 +485,8 @@ document.addEventListener('click',function(e){
   if(t.dataset.ot){S.otype=t.dataset.ot;saveDraft();render();return;}
   if(t.dataset.due!==undefined){if(t.classList.contains('dim'))return;S.due=+t.dataset.due;saveDraft();render();return;}
   if(t.dataset.cam){PICK=t.dataset.cam;$('picker').value='';$('picker').click();return;}
-  if(t.dataset.del){var arr=t.dataset.del==='F'?S.pf:S.pa;arr.splice(+t.dataset.i,1);if(!S.pa.length&&S.due===0)S.due=1;saveDraft();render();return;}
+  if(t.dataset.ed){PE.open(t.dataset.ed,+t.dataset.i);return;}
+  if(t.dataset.del){var arr=t.dataset.del==='F'?S.pf:S.pa;metaArr(t.dataset.del).splice(+t.dataset.i,1);arr.splice(+t.dataset.i,1);if(!S.pa.length&&S.due===0)S.due=1;saveDraft();render();return;}
   if(t.dataset.qflag!==undefined){var fi=+t.dataset.qflag;FLAG_OPEN=FLAG_OPEN===fi?-1:fi;render();return;}
   if(t.dataset.rpt){var q=QUEUE[+t.dataset.qi];if(q){q.repeat=+t.dataset.rpt;if(q.repeat<2)q.repeatNote='';saveQueue();}render();return;}
   if(t.dataset.qdel!==undefined){FLAG_OPEN=-1;QUEUE.splice(+t.dataset.qdel,1);saveQueue();if(!QUEUE.length)JUST_SAVED=false;render();return;}
@@ -477,8 +523,8 @@ function jump(k){
 var PICK='F';
 $('picker').addEventListener('change',function(){
   var files=[].slice.call(this.files||[]);if(!files.length)return;
-  var arr=PICK==='F'?S.pf:S.pa, room=MAXP-arr.length;
-  files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);});});},Promise.resolve())
+  var arr=PICK==='F'?S.pf:S.pa, mx=metaArr(PICK), room=MAXP-arr.length;
+  files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d){arr.push(d);mx.push(null);}});});},Promise.resolve())
     .then(function(){saveDraft();render();});
 });
 function shrink(file){
@@ -554,6 +600,142 @@ function flushOutbox(){
 
 start();
 
+
+/* =====================================================================
+   Photo editor (7 Oct 2026, TK chose D1 + E1 from the mockups)
+   Toolbar on top: ยกเลิก · ↶ · ↷ │ ยางลบ (ล้างทั้งหมด) · เสร็จ / กรอบ วงกลม ลูกศร ขีดเขียน ครอป หมุน / 4 colours + 3 widths.
+   Non-destructive: per photo we keep meta {orig, base, shapes} beside the flattened image in S.pf / S.pa.
+   S.pf / S.pa always hold the flattened JPEG = exactly what is sent (send code unchanged).
+   meta: null = never edited · base:null = no crop/rotate (base is orig) · shapes = editable marks.
+   Re-opening restores the marks; ↶ removes them one by one; ยางลบ = back to the original (↶ undoes it).
+   Crop / rotate flatten the marks drawn so far into the photo (warned with a toast).
+   ===================================================================== */
+function metaArr(g){var k=g==='F'?'pfx':'pax',a=g==='F'?S.pf:S.pa;if(!Array.isArray(S[k]))S[k]=[];while(S[k].length<a.length)S[k].push(null);if(S[k].length>a.length)S[k].length=a.length;return S[k];}
+var PE=(function(){
+  var E={g:'F',i:-1,base:null,orig:null,shapes:[],hist:[],fut:[],tool:'box',color:'#ef5350',size:1,drag:null,crop:null};
+  var cv=$('pecv'),ctx=cv.getContext('2d');
+  var SIZES=[0.6,1,1.6];
+  var COLS=['#ef5350','#f4b728','#2ecc8f','#ffffff'];
+  var TOOLS=[['box','กรอบ'],['circle','วงกลม'],['arrow','ลูกศร'],['pen','ขีดเขียน'],['crop','ครอป'],['rotate','หมุน']];
+  var SVG={
+   box:'<rect x="4" y="6" width="16" height="12" rx="1.5"/>',circle:'<circle cx="12" cy="12" r="8"/>',arrow:'<path d="M6 18L18 6M9 6h9v9"/>',
+   pen:'<path d="M15.5 4.5l4 4L9 19H5v-4z"/><path d="M13.5 6.5l4 4"/>',crop:'<path d="M7 3v14h14"/><path d="M3 7h14v14"/>',
+   rotate:'<path d="M20 11a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>',undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+   redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+   erase:'<path d="M7 21l-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="M5 11l9 9"/>'};
+  function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+SVG[n]+'</svg>';}
+  function lwFor(sz){return Math.max(E.base.width,E.base.height)*0.007*SIZES[sz];}
+  function cloneCanvas(c){var n=document.createElement('canvas');n.width=c.width;n.height=c.height;n.getContext('2d').drawImage(c,0,0);return n;}
+  function copyShapes(a){return (a||[]).map(function(s){var n=Object.assign({},s);if(s.pts)n.pts=s.pts.map(function(p){return p.slice();});return n;});}
+  function snap(){E.fut=[];E.hist.push({base:E.base,shapes:copyShapes(E.shapes)});if(E.hist.length>40)E.hist.shift();}
+  function toast(t,ms){var x=$('petoast');x.textContent=t;x.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){x.classList.remove('on');},ms||1600);}
+  function loadCanvas(src){return new Promise(function(res){if(!src)return res(null);var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);res(c);};im.onerror=function(){res(null);};im.src=src;});}
+  function canReset(){return !!E.base&&(E.shapes.length>0||E.base!==E.orig);}
+  function open(g,i){
+    var arr=g==='F'?S.pf:S.pa,meta=metaArr(g)[i]||null;
+    var origSrc=meta&&meta.orig||arr[i];
+    Promise.all([loadCanvas(origSrc),loadCanvas(meta&&meta.base)]).then(function(c){
+      if(!c[0]){alertBox('เปิดรูปไม่ได้',true);return;}
+      E.g=g;E.i=i;E.orig=c[0];E.base=c[1]||c[0];E.shapes=copyShapes(meta&&meta.shapes);E.fut=[];E.crop=null;E.tool='box';E.drag=null;
+      E.hist=[];for(var k=0;k<E.shapes.length;k++)E.hist.push({base:E.base,shapes:copyShapes(E.shapes.slice(0,k))});
+      $('pe').classList.add('on');document.body.style.overflow='hidden';bar();fit();draw();
+      toast(E.shapes.length?'กรอบเดิมยังอยู่ · ↶ ลบทีละอัน · ยางลบ = ล้างทั้งหมด':'ลากบนรูปเพื่อตีกรอบ',E.shapes.length?2600:1600);
+    });
+  }
+  function close(){$('pe').classList.remove('on');document.body.style.overflow='';$('pecrop').classList.remove('on');E.base=E.orig=null;}
+  function fit(){var st=$('pestage'),W=st.clientWidth-16,H=st.clientHeight-16,b=E.base,k=Math.min(W/b.width,H/b.height);
+    cv.width=b.width;cv.height=b.height;cv.style.width=Math.round(b.width*k)+'px';cv.style.height=Math.round(b.height*k)+'px';}
+  window.addEventListener('resize',function(){if(E.base&&$('pe').classList.contains('on')){fit();draw();}});
+  function paint(g,s){
+    var w=s.w;g.lineCap='round';g.lineJoin='round';
+    var pass=function(col,width){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=width;
+      if(s.t==='box'){g.strokeRect(Math.min(s.x1,s.x2),Math.min(s.y1,s.y2),Math.abs(s.x2-s.x1),Math.abs(s.y2-s.y1));}
+      else if(s.t==='circle'){g.beginPath();g.ellipse((s.x1+s.x2)/2,(s.y1+s.y2)/2,Math.abs(s.x2-s.x1)/2,Math.abs(s.y2-s.y1)/2,0,0,Math.PI*2);g.stroke();}
+      else if(s.t==='arrow'){var a=Math.atan2(s.y2-s.y1,s.x2-s.x1),hl=w*4.2;
+        g.beginPath();g.moveTo(s.x1,s.y1);g.lineTo(s.x2-Math.cos(a)*hl*0.6,s.y2-Math.sin(a)*hl*0.6);g.stroke();
+        g.beginPath();g.moveTo(s.x2,s.y2);g.lineTo(s.x2-hl*Math.cos(a-0.45),s.y2-hl*Math.sin(a-0.45));g.lineTo(s.x2-hl*Math.cos(a+0.45),s.y2-hl*Math.sin(a+0.45));g.closePath();g.fill();g.stroke();}
+      else if(s.t==='pen'){g.beginPath();s.pts.forEach(function(p,i){i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});g.stroke();}
+    };
+    pass('rgba(0,0,0,.55)',w*1.7);pass(s.c,w);   /* dark halo: red/yellow/white read on any background */
+  }
+  function norm(r){return {x:Math.min(r.x1,r.x2),y:Math.min(r.y1,r.y2),w:Math.abs(r.x2-r.x1),h:Math.abs(r.y2-r.y1)};}
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(E.base,0,0);
+    E.shapes.forEach(function(s){paint(ctx,s);});
+    if(E.drag&&E.drag.s)paint(ctx,E.drag.s);
+    if(E.crop){var c=norm(E.crop);ctx.fillStyle='rgba(0,0,0,.55)';
+      ctx.fillRect(0,0,cv.width,c.y);ctx.fillRect(0,c.y+c.h,cv.width,cv.height-c.y-c.h);ctx.fillRect(0,c.y,c.x,c.h);ctx.fillRect(c.x+c.w,c.y,cv.width-c.x-c.w,c.h);
+      ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,cv.width/300);ctx.setLineDash([cv.width/60,cv.width/90]);ctx.strokeRect(c.x,c.y,c.w,c.h);ctx.setLineDash([]);}
+  }
+  function pt(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height];}
+  cv.addEventListener('pointerdown',function(e){
+    e.preventDefault();try{cv.setPointerCapture(e.pointerId);}catch(x){}var p=pt(e);
+    if(E.tool==='crop'){E.crop={x1:p[0],y1:p[1],x2:p[0],y2:p[1]};E.drag={crop:1};$('pecrop').classList.remove('on');draw();return;}
+    var s={t:E.tool,c:E.color,w:lwFor(E.size),x1:p[0],y1:p[1],x2:p[0],y2:p[1]};if(E.tool==='pen')s.pts=[p];
+    E.drag={s:s};
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!E.drag)return;var p=pt(e);
+    if(E.drag.crop){E.crop.x2=Math.max(0,Math.min(cv.width,p[0]));E.crop.y2=Math.max(0,Math.min(cv.height,p[1]));draw();return;}
+    var s=E.drag.s;s.x2=p[0];s.y2=p[1];if(s.t==='pen')s.pts.push(p);draw();
+  });
+  function endDrag(){
+    if(!E.drag)return;
+    if(E.drag.crop){E.drag=null;var c=norm(E.crop);if(c.w<cv.width*0.05||c.h<cv.height*0.05){E.crop=null;draw();toast('ลากให้กว้างขึ้นอีกนิด');return;}$('pecrop').classList.add('on');draw();return;}
+    var s=E.drag.s;E.drag=null;
+    var big=s.t==='pen'?s.pts.length>2:(Math.abs(s.x2-s.x1)+Math.abs(s.y2-s.y1))>s.w*3;
+    if(big){snap();E.shapes.push(s);bar();}
+    draw();
+  }
+  cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
+  function bake(){var c=cloneCanvas(E.base),g=c.getContext('2d');E.shapes.forEach(function(s){paint(g,s);});return c;}
+  $('pecropOk').onclick=function(){var r=norm(E.crop);snap();var b=bake(),c=document.createElement('canvas');c.width=Math.round(r.w);c.height=Math.round(r.h);
+    c.getContext('2d').drawImage(b,r.x,r.y,r.w,r.h,0,0,c.width,c.height);E.base=c;E.shapes=[];E.crop=null;$('pecrop').classList.remove('on');E.tool='box';fit();draw();bar();toast('ครอปแล้ว');};
+  $('pecropNo').onclick=function(){E.crop=null;$('pecrop').classList.remove('on');draw();};
+  function rotate(){snap();var b=bake(),c=document.createElement('canvas');c.width=b.height;c.height=b.width;var g=c.getContext('2d');
+    g.translate(c.width,0);g.rotate(Math.PI/2);g.drawImage(b,0,0);E.base=c;E.shapes=[];fit();draw();bar();}
+  function bar(){
+    $('pebar').innerHTML='<div class="pe-hdr"><div class="l"><button type="button" class="pe-cancel" data-pa="cancel">ยกเลิก</button></div><div class="pe-ur">'+
+      '<button type="button" data-pa="undo"'+(E.hist.length?'':' disabled')+' aria-label="Undo">'+ic('undo')+'</button>'+
+      '<button type="button" data-pa="redo"'+(E.fut.length?'':' disabled')+' aria-label="Redo">'+ic('redo')+'</button>'+
+      '<span class="pe-dv"></span><button type="button" data-pa="reset"'+(canReset()?'':' disabled')+' aria-label="ล้างทั้งหมด">'+ic('erase')+'</button></div>'+
+      '<div class="r"><button type="button" class="pe-done" data-pa="done">เสร็จ</button></div></div>'+
+      '<div class="pe-tools">'+TOOLS.map(function(t){return '<button type="button" class="pe-tl'+(E.tool===t[0]?' on':'')+'" data-pt="'+t[0]+'">'+ic(t[0])+t[1]+'</button>';}).join('')+'</div>'+
+      '<div class="pe-style"><div class="pe-cols">'+COLS.map(function(c){return '<button type="button" class="pe-sw'+(E.color===c?' on':'')+'" data-pc="'+c+'" style="background:'+c+'"></button>';}).join('')+
+      '</div><div class="pe-seg">'+[2,4,7].map(function(h,i){return '<button type="button" data-psz="'+i+'"'+(E.size===i?' class="on"':'')+'><i style="height:'+h+'px"></i></button>';}).join('')+'</div></div>';
+  }
+  function setTool(t){
+    if((t==='rotate'||t==='crop')&&E.shapes.length)toast('⚠ กรอบที่วาดไว้จะรวมเข้ากับรูป (ลบได้ด้วย ↶ เท่านั้น)',2400);
+    if(t==='rotate'){rotate();return;}
+    E.tool=t;E.crop=null;$('pecrop').classList.remove('on');bar();
+    if(t==='crop'&&!E.shapes.length)toast('ลากเลือกส่วนที่ต้องการเก็บ');draw();
+  }
+  function done(){
+    var arr=E.g==='F'?S.pf:S.pa,meta=metaArr(E.g),dirtyBase=E.base!==E.orig,any=E.shapes.length>0||dirtyBase,cur=meta[E.i]||null;
+    if(!any){                                   /* nothing left → back to the plain original */
+      arr[E.i]=cur&&cur.orig||arr[E.i];meta[E.i]=null;
+    }else{
+      meta[E.i]={orig:cur&&cur.orig||arr[E.i],base:dirtyBase?E.base.toDataURL('image/jpeg',0.9):null,shapes:copyShapes(E.shapes)};
+      arr[E.i]=bake().toDataURL('image/jpeg',JPEGQ);
+    }
+    close();saveDraft();render();
+  }
+  $('pe').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;e.stopPropagation();
+    if(b.closest('#pecrop'))return;
+    if(b.dataset.pt){setTool(b.dataset.pt);return;}
+    if(b.dataset.pc){E.color=b.dataset.pc;bar();return;}
+    if(b.dataset.psz){E.size=+b.dataset.psz;bar();return;}
+    var a=b.dataset.pa,sz=E.base&&E.base.width+'x'+E.base.height;
+    if(a==='undo'||a==='redo'){var from=a==='undo'?E.hist:E.fut,to=a==='undo'?E.fut:E.hist,h=from.pop();if(!h)return;
+      to.push({base:E.base,shapes:copyShapes(E.shapes)});E.base=h.base;E.shapes=copyShapes(h.shapes);E.crop=null;$('pecrop').classList.remove('on');
+      if(sz!==E.base.width+'x'+E.base.height)fit();draw();bar();return;}
+    if(a==='reset'){if(!canReset())return;snap();E.base=E.orig;E.shapes=[];E.crop=null;$('pecrop').classList.remove('on');fit();draw();bar();toast('กลับเป็นรูปต้นฉบับแล้ว (กด ↶ เพื่อเอาคืน)');return;}
+    if(a==='cancel'){close();return;}
+    if(a==='done'){done();return;}
+  });
+  return {open:open};
+})();
 </script>
 </body>
 </html>
