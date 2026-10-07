@@ -124,6 +124,10 @@ textarea.inp{min-height:92px;resize:vertical}
 .btn.green{background:var(--green);color:#fff}
 .btn.ghost{background:transparent;color:var(--accent-text);border:1px solid var(--accent)}
 .savedok{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green);border-radius:var(--r-ctl);padding:11px 12px;font-size:14px;font-weight:800;margin-bottom:12px;text-align:center}
+.qn{display:inline-block;min-width:20px;padding:1px 7px;margin-left:4px;border-radius:99px;background:var(--accent-bg);color:var(--accent-text);font-size:12px;font-weight:800;text-align:center;vertical-align:1px}
+.qbar{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;margin:0 0 12px;padding:11px 14px;border:1px solid var(--accent);border-radius:var(--r-ctl);background:var(--accent-bg);color:var(--accent-text);font-size:14px;font-weight:800}
+.qbar b{font-size:13px}
+.qbar .qn{background:var(--accent);color:var(--accent-ink)}
 .qcard{border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:9px;background:var(--card)}
 .qcard:last-child{margin-bottom:0}
 .qtop{display:flex;align-items:center;gap:8px}
@@ -188,7 +192,7 @@ textarea.inp{min-height:92px;resize:vertical}
 <div class="appbar" id="appbar" hidden>
   <div class="who" id="who"></div>
 </div>
-<div class="scr" id="scr"><div class="body" id="body"><div class="screen"><div class="spin"></div><p style="margin-top:12px">กำลังเปิดฟอร์ม…</p></div></div></div>
+<div class="scr" id="scr"><div class="body" id="body"><div class="screen"><div class="spin"></div><p style="margin-top:12px" id="bootmsg">Opening form…</p><small id="boott" style="color:var(--muted);font-size:11.5px"></small></div></div></div>
 <div class="foot" id="foot" hidden></div>
 <div class="overlay" id="overlay"><div class="box"><div class="spin"></div><div style="margin-top:10px" id="ovtxt">Sending…</div><small id="ovsub"></small></div></div>
 <input type="file" id="picker" accept="image/*" multiple hidden>
@@ -227,11 +231,17 @@ function api(action, extra){
 }
 
 /* ---------------- start ---------------- */
+var T0=Date.now(),BOOT_MS={};
+function bootStep(msg){var m=$('bootmsg');if(m)m.textContent=msg;}
+var _bt=setInterval(function(){var t=$('boott');if(!t||BOOT){clearInterval(_bt);return;}t.textContent=((Date.now()-T0)/1000).toFixed(1)+' s';},200);
 function start(){
+  bootStep('Signing in with LINE…');
   liff.init({liffId:LIFF_ID}).then(function(){
     if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
+    BOOT_MS.liff=Date.now()-T0;
     TOKEN = liff.getIDToken() || '';
-    return api('boot').then(onBoot);
+    bootStep('Loading your form…');
+    return api('boot').then(function(r){BOOT_MS.server=Date.now()-T0-BOOT_MS.liff;BOOT_MS.total=Date.now()-T0;lsSet('line_obs_boot_ms',BOOT_MS);try{console.log('boot ms',JSON.stringify(BOOT_MS));}catch(e){}onBoot(r);});
   }).catch(function(e){screenError('เปิดฟอร์มไม่สำเร็จ',String(e&&e.message||e));});
 }
 function onBoot(r){
@@ -336,6 +346,7 @@ function screenAsk(err){
    S1 Save → Ready to send (flag + follow-up note, edit, remove) → "+ Add More" / "Send All".
    Queue + draft live in IndexedDB WITH photos, so closing LINE loses nothing.
    ===================================================================== */
+var SAVED_FLASH=false;   /* r2 7 Oct: "✓ Saved" banner only right after Save, not when opened from the banner */
 var QUEUE=[], JUST_SAVED=false, FLAG_OPEN=-1, EDIT_FROM=0;
 
 /* ---------------- tiny IndexedDB store (falls back to memory) ---------------- */
@@ -405,7 +416,7 @@ function secType(){
 function group(g,arr,label,req){
   var mx=metaArr(g);
   var h=arr.map(function(src,i){return '<div class="slot has"><img src="'+src+'" alt="">'+(mx[i]?'<span class="edtag">✓ Edited</span>':'')+
-    '<button type="button" class="edbtn" data-ed="'+g+'" data-i="'+i+'"><span>✎ '+(mx[i]?'แก้อีกรอบ':'แก้รูป')+'</span></button>'+
+    '<button type="button" class="edbtn" data-ed="'+g+'" data-i="'+i+'"><span>✎ '+(mx[i]?'Edit again':'Edit')+'</span></button>'+
     '<button type="button" class="x" data-del="'+g+'" data-i="'+i+'">&times;</button></div>';}).join('');
   if(arr.length<MAXP)h+='<div class="slot" data-cam="'+g+'"><span class="ic">📷</span>'+label+(req&&!arr.length?'<span class="reqtag">required</span>':'')+'</div>';
   return '<div class="phd">'+label+'<span>'+arr.length+'/'+MAXP+'</span></div><div class="shot">'+h+'</div>';
@@ -416,7 +427,7 @@ function secPhoto(){
     '<span class="hint">ถ่ายใหม่หรือเลือกจากอัลบั้มได้ · สูงสุด '+MAXP+' รูปต่อช่อง · แตะรูปเพื่อตีกรอบ / ครอป</span></div></div>';
 }
 function secDetail(){
-  var dues=[[0,'Already closed',S.pa.length?'ปิดแล้ว · แก้จบหน้างาน':'ต้องมีรูป After ก่อน'],[1,'Tomorrow',dueDate(1)],[2,'+2 days',dueDate(2)],[3,'+3 days',dueDate(3)]];
+  var dues=[[0,'Already closed',S.pa.length?'แก้ไขแล้ว':'ต้องมีรูป After ก่อน'],[1,'Tomorrow',dueDate(1)],[2,'+2 days',dueDate(2)],[3,'+3 days',dueDate(3)]];
   return '<div class="card'+(secDone('found')?' done':'')+'" id="sec-found">'+head('found',gp()?'Details':'Details &amp; Close Due',gp()?'รายละเอียด':'รายละเอียด · กำหนดปิด')+'<div class="sb">'+
     '<label class="f">'+lb('What you found','สิ่งที่พบเจอ',1,cnt(S.found))+'<textarea class="inp" data-b="found" placeholder="e.g. พบนั่งร้านไม่มีป้ายตรวจสอบติดอยู่">'+esc(S.found)+'</textarea></label>'+
     (gp()?'':'<label class="f" id="sec-rec">'+lb('Recommendation','ข้อเสนอแนะ',1,cnt(S.rec))+'<textarea class="inp" data-b="rec" placeholder="สิ่งที่ต้องแก้ไข และวิธีป้องกันไม่ให้เกิดซ้ำ">'+esc(S.rec)+'</textarea></label>'+
@@ -434,17 +445,17 @@ function qSub(e){
 }
 function queueHtml(){
   if(!QUEUE.length)return '';
-  return '<div class="card"><div class="sh"><span class="tt">Ready to send<span class="th">พร้อมส่ง · '+QUEUE.length+'</span></span></div><div class="sb">'+
-    QUEUE.map(function(e,i){
+  return '<div class="card"><div class="sh"><span class="tt">Ready to send <span class="qn">'+QUEUE.length+'</span></span></div><div class="sb">'+
+    QUEUE.map(function(e,i){return [e,i];}).reverse().map(function(p){var e=p[0],i=p[1];   /* newest first; i = real index */
       var n=rptN(e),isgp=e.mode==='gp';
       return '<div class="qcard"><div class="qtop"><span class="k '+(isgp?'g':'f')+'">'+(isgp?'GOOD PRACTICE':'FINDING')+'</span>'+
         '<span class="qt">'+esc(e.found)+'</span>'+
         (isgp?'':'<button type="button" class="flagpill'+(n===3?' on':(n===2?' on2':(FLAG_OPEN===i?' open':'')))+'" data-qflag="'+i+'">🚩'+(n>1?(n===2?' 2nd':' 3+'):'')+'</button>')+'</div>'+
         '<div class="qsub">'+esc(qSub(e))+' · 📷 '+e.pf.length+'</div>'+
-        (FLAG_OPEN===i&&!isgp?'<div class="rpt"><span class="lb">Repeat finding?<span class="th">ยังไม่ได้แก้ไข</span></span><div class="tiles three">'+
+        (FLAG_OPEN===i&&!isgp?'<div class="rpt"><span class="lb">Repeat finding? — No action taken</span><div class="tiles three">'+
           [1,2,3].map(function(v){return '<button type="button" class="tile'+(n===v?' on':'')+(v>1?' rp'+v:'')+'" data-rpt="'+v+'" data-qi="'+i+'">'+['First Time','2nd Time','3+ Times'][v-1]+'</button>';}).join('')+'</div>'+
-          (n>1?'<span class="lb" style="margin-top:10px">Follow-up note<span class="th">เหตุผล / แจ้งไปแล้วเมื่อไร</span></span>'+
-            '<textarea class="inp" data-qnote="'+i+'" maxlength="300" placeholder="e.g. told CNT foreman 12 Sep and 16 Sep, still not replaced">'+esc(e.repeatNote||'')+'</textarea>':'')+'</div>':'')+
+          (n>1?'<span class="lb" style="margin-top:10px">Follow-up note</span>'+
+            '<textarea class="inp" data-qnote="'+i+'" maxlength="300">'+esc(e.repeatNote||'')+'</textarea>':'')+'</div>':'')+
         '<div class="qact"><button type="button" data-qedit="'+i+'">✎ Edit</button><button type="button" data-qdel="'+i+'">✕ Remove</button></div></div>';
     }).join('')+'</div></div>';
 }
@@ -453,13 +464,13 @@ function render(){
   var me=BOOT.me||{};
   $('who').innerHTML=esc(me.name||me.nick||'')+' <span class="vf">verified · LINE</span>';
   if(JUST_SAVED&&QUEUE.length){
-    $('body').innerHTML='<div id="outnote"></div><div class="savedok">✓ Saved · บันทึกแล้ว</div>'+queueHtml();
+    $('body').innerHTML='<div id="outnote"></div>'+(SAVED_FLASH?'<div class="savedok">✓ Saved · บันทึกแล้ว</div>':'')+queueHtml();
   }else{
     SECN={};var n=0;SECN.area=++n;if(!gp())SECN.otype=++n;SECN.photo=++n;SECN.found=++n;
     $('body').innerHTML=
       '<div class="mode"><button type="button" class="find'+(gp()?'':' on')+'" data-mode="find">FINDING</button><button type="button" class="gp'+(gp()?' on':'')+'" data-mode="gp">GOOD PRACTICE</button></div>'+
-      '<div id="outnote"></div>'+(EDIT_FROM?'<div class="note">กำลังแก้รายการที่ '+EDIT_FROM+' — กด Save เพื่อเก็บกลับเข้า Ready to send</div>':'')+
-      secWhere()+(gp()?'':secType())+secPhoto()+secDetail()+queueHtml();
+      '<div id="outnote"></div>'+(QUEUE.length?'<button type="button" class="qbar" id="toQueue"><span>Ready to send <span class="qn">'+QUEUE.length+'</span></span><b>View ›</b></button>':'')+(EDIT_FROM?'<div class="note">กำลังแก้รายการที่ '+EDIT_FROM+' — กด Save เพื่อเก็บกลับเข้า Ready to send</div>':'')+
+      secWhere()+(gp()?'':secType())+secPhoto()+secDetail();
   }
   renderFoot();
   showOutboxNote();
@@ -474,7 +485,7 @@ function renderFoot(){
   var seg=c.map(function(x){return '<span class="'+(x[2]?'on':'')+'"></span>';}).join('');
   $('foot').innerHTML='<button type="button" class="pgo" id="slim"><span class="pmeta"><span>'+(ok?'✓ Ready to save':done+' / '+tot+' · next <b>'+esc(nx[1])+'</b>')+'</span>'+
       (ok?'':'<span class="go">GO ›</span>')+'</span><span class="seg'+(ok?' done':'')+'">'+seg+'</span></button>'+
-    '<div class="btns"><button type="button" class="btn'+(QUEUE.length?' ghost':'')+'" id="save" aria-disabled="'+(!ok)+'">Save</button>'+sendBtn+'</div>';
+    '<div class="btns"><button type="button" class="btn" id="save" aria-disabled="'+(!ok)+'">Save</button></div>';
 }
 
 /* ---------------- events ---------------- */
@@ -500,8 +511,9 @@ document.addEventListener('click',function(e){
     var at=EDIT_FROM?EDIT_FROM-1:QUEUE.length;QUEUE.splice(at,0,S);saveQueue();
     var keep={date:S.date,mode:S.mode,area:S.area,subArea:S.subArea,otherSub:S.otherSub,company:S.company,otherCo:S.otherCo};
     S=Object.assign(blank(),keep);saveDraft();   /* same walk, same place — keep date/area/company */
-    EDIT_FROM=0;JUST_SAVED=true;FLAG_OPEN=-1;render();$('scr').scrollTop=0;return;}
-  if(t.id==='addMore'){JUST_SAVED=false;render();$('scr').scrollTop=0;return;}
+    EDIT_FROM=0;JUST_SAVED=true;SAVED_FLASH=true;FLAG_OPEN=-1;render();$('scr').scrollTop=0;return;}
+  if(t.id==='addMore'){JUST_SAVED=false;SAVED_FLASH=false;render();$('scr').scrollTop=0;return;}
+  if(t.id==='toQueue'){JUST_SAVED=true;SAVED_FLASH=false;FLAG_OPEN=-1;render();$('scr').scrollTop=0;return;}
   if(t.id==='sendAll'){if(t.getAttribute('aria-disabled')==='true')return;sendAll();return;}
 });
 document.addEventListener('input',function(e){
