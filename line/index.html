@@ -52,13 +52,14 @@ body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;displ
 .sh .no{width:21px;height:21px;flex:0 0 21px;border-radius:50%;border:1px solid var(--border2);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--text2)}
 .card.done .sh .no{background:var(--green-bg);border-color:var(--green);color:var(--green-text)}
 .sh .tt{font-size:13px;font-weight:700}
-.sh .tt small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.sh .tt .th{font-size:11.5px;color:var(--muted);font-weight:600;margin-left:7px}
 .sb{padding:4px 12px 14px}
 .f{display:block;margin-bottom:13px}
 .f:last-child{margin-bottom:0}
 .lb{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--text2);margin-bottom:6px}
 .lb .rq{color:var(--red);margin-right:4px}
-.lb .th{display:block;letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted);font-size:11px;margin-top:1px}
+.lb .th{letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted);font-size:11px;margin-left:6px}
+.lb .th:before{content:"· "}
 .lb .cnt{float:right;letter-spacing:0;text-transform:none;font-weight:600;color:var(--muted);font-size:10.5px}
 .lb .cnt.low{color:var(--amber-text)}
 .inp{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-ctl);padding:11px;font-size:16px;font-family:inherit;-webkit-appearance:none;appearance:none}
@@ -107,12 +108,46 @@ textarea.inp{min-height:92px;resize:vertical}
 .overlay.show{display:flex}
 .overlay .box{background:var(--card);border-radius:14px;padding:22px 26px;text-align:center;font-weight:800;color:var(--accent-text);min-width:200px}
 .overlay .box small{display:block;font-weight:600;color:var(--muted);margin-top:6px}
+/* v3 6 Oct 2026 */
+.datebox{position:relative}
+.datebox .show{pointer-events:none}
+.datebox input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+.pgo{all:unset;cursor:pointer;display:block;box-sizing:border-box;width:100%}
+.pmeta{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px}
+.pmeta b{color:var(--text)}
+.pmeta .go{color:var(--accent-text);font-weight:800;font-size:10.5px;letter-spacing:.05em}
+.seg{display:flex;gap:4px}
+.seg span{flex:1;height:7px;border-radius:3px;background:var(--track);transition:background .3s}
+.seg span.on{background:var(--live)}
+.seg.done span{background:var(--green)}
+.btns{display:flex;gap:8px}.btns .btn{flex:1}
+.btn.green{background:var(--green);color:#fff}
+.btn.ghost{background:transparent;color:var(--accent-text);border:1px solid var(--accent)}
+.savedok{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green);border-radius:var(--r-ctl);padding:11px 12px;font-size:14px;font-weight:800;margin-bottom:12px;text-align:center}
+.qcard{border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:9px;background:var(--card)}
+.qcard:last-child{margin-bottom:0}
+.qtop{display:flex;align-items:center;gap:8px}
+.qtop .k{flex:none;font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:5px}
+.k.f{background:var(--live-bg);color:var(--live)}.k.g{background:var(--green-bg);color:var(--green-text)}
+.qt{flex:1;min-width:0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qsub{font-size:11.5px;color:var(--muted);margin-top:4px}
+.flagpill{all:unset;cursor:pointer;flex:none;font-size:11px;font-weight:800;padding:5px 9px;border-radius:99px;border:1px solid var(--border2);color:var(--text2)}
+.flagpill.open{border-color:var(--accent);color:var(--accent-text)}
+.flagpill.on2{border-color:var(--amber);background:var(--amber-bg);color:var(--amber-text)}
+.flagpill.on{border-color:var(--red);background:var(--red-bg);color:var(--red-text)}
+.rpt{margin-top:9px;padding:9px;border-radius:9px;background:var(--bg2)}
+.tiles.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.rpt .tile{padding:9px 4px;font-size:12px}
+.rpt .tile.rp2.on{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-text)}
+.rpt .tile.rp3.on{background:var(--red-bg);border-color:var(--red);color:var(--red-text)}
+.rpt textarea.inp{min-height:64px;margin-top:2px}
+.qact{display:flex;gap:7px;margin-top:9px}
+.qact button{all:unset;cursor:pointer;font-size:12px;font-weight:700;color:var(--accent-text);padding:4px 10px;border:1px solid var(--border2);border-radius:7px}
 </style>
 </head>
 <body>
 <div class="appbar" id="appbar" hidden>
   <div class="who" id="who"></div>
-  <div class="prog"><i id="progbar"></i></div>
 </div>
 <div class="scr" id="scr"><div class="body" id="body"><div class="screen"><div class="spin"></div><p style="margin-top:12px">กำลังเปิดฟอร์ม…</p></div></div></div>
 <div class="foot" id="foot" hidden></div>
@@ -130,7 +165,7 @@ var OTYPES   = [['ua','Unsafe Action','การกระทำไม่ปล�
                 ['env','Environment Impact','มีผลกระทบต่อสิ่งแวดล้อม'],['oth','Other','อื่นๆ — ระบุ']];
 var LS_DRAFT = 'line_obs_draft_v1', LS_OUT = 'line_obs_outbox_v1';
 
-var BOOT = null, TOKEN = '', S = null, SENDING = false;
+var BOOT = null, TOKEN = '', S = null, SENDING = false;   /* v3 6 Oct 2026: queue (Save → Send All) */
 
 /* ---------------- small helpers ---------------- */
 function $(id){return document.getElementById(id);}
@@ -163,11 +198,14 @@ function onBoot(r){
   if(r.status==='pending'){BIND.lineName=r.lineName||'';screenPending(r.officer);return;}
   if(r.status==='rejected'){screenError('บัญชี LINE นี้ยังใช้ฟอร์มไม่ได้','แจ้ง TK เพื่อตรวจสอบ');return;}
   BOOT=r.boot;
-  var d=lsGet(LS_DRAFT,null);
-  S=(d&&d.v===1)?Object.assign(blank(),d.s):blank();
-  $('appbar').hidden=false;$('foot').hidden=false;
-  render();
-  flushOutbox();
+  idbOpen().then(function(){return Promise.all([idbGet('queue'),idbGet('draft')]);}).then(function(v){
+    QUEUE=Array.isArray(v[0])?v[0]:[];
+    var d=lsGet(LS_DRAFT,null);
+    S=v[1]?Object.assign(blank(),v[1]):((d&&d.v===1)?Object.assign(blank(),d.s):blank());
+    $('appbar').hidden=false;$('foot').hidden=false;
+    render();
+    flushOutbox();
+  });
 }
 
 /* ---------------- non-form screens ---------------- */
@@ -250,54 +288,77 @@ function screenAsk(err){
   };
 }
 
+/* =====================================================================
+   v3 (6 Oct 2026, TK from line_v3_mockup): W2 "Date & Location" · Thai after English on one line ·
+   date shown "06 Oct 2026" · GP hides Observation Type + Close Due · P2 segmented progress ·
+   S1 Save → Ready to send (flag + follow-up note, edit, remove) → "+ Add More" / "Send All".
+   Queue + draft live in IndexedDB WITH photos, so closing LINE loses nothing.
+   ===================================================================== */
+var QUEUE=[], JUST_SAVED=false, FLAG_OPEN=-1, EDIT_FROM=0;
+
+/* ---------------- tiny IndexedDB store (falls back to memory) ---------------- */
+var IDB=null;
+function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open('line_obs_v3',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('kv');};r.onsuccess=function(){IDB=r.result;res();};r.onerror=function(){res();};}catch(e){res();}});}
+function idbGet(k){return new Promise(function(res){if(!IDB)return res(null);try{var q=IDB.transaction('kv').objectStore('kv').get(k);q.onsuccess=function(){res(q.result||null);};q.onerror=function(){res(null);};}catch(e){res(null);}});}
+function idbPut(k,v){if(!IDB)return;try{IDB.transaction('kv','readwrite').objectStore('kv').put(v,k);}catch(e){}}
+var _dT=null;
+function saveDraft(){lsSet(LS_DRAFT,{v:1,s:Object.assign({},S,{pf:[],pa:[]})});clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
+function saveQueue(){idbPut('queue',QUEUE);}
+
 /* ---------------- validation ---------------- */
 function gp(){return S.mode==='gp';}
 function coName(){return S.company==='__other'?S.otherCo.trim():S.company;}
-function missingList(){
-  var m=[];
-  if(!S.area)m.push(['area','Area · พื้นที่']);
-  if(!coName())m.push(['company','Company · บริษัท']);
-  if(!gp()&&!(S.otype&&(S.otype!=='oth'||S.otherType.trim())))m.push(['otype','Observation type · ลักษณะที่พบ']);
-  if(!S.pf.length)m.push(['photo','Photo — Found · รูป']);
-  if(S.found.trim().length<10)m.push(['found','What you found · สิ่งที่พบ (10+)']);
-  if(!gp()&&S.rec.trim().length<10)m.push(['rec','Recommendation · ข้อเสนอแนะ (10+)']);
-  return m;
+/* one entry per required field = one segment of the P2 bar */
+function checks(){
+  var c=[['area','Area',!!S.area],['company','Company',!!coName()]];
+  if(!gp())c.push(['otype','Type',!!(S.otype&&(S.otype!=='oth'||S.otherType.trim()))]);
+  c.push(['photo','Photo',S.pf.length>0]);
+  c.push(['found','Found',S.found.trim().length>=10]);
+  if(!gp())c.push(['rec','Recommendation',S.rec.trim().length>=10]);
+  return c;
 }
-function secDone(i){
-  if(i===0)return !!(S.area&&coName());
-  if(i===1)return gp()||!!(S.otype&&(S.otype!=='oth'||S.otherType.trim()));
-  if(i===2)return S.pf.length>0;
+function missingList(){return checks().filter(function(x){return !x[2];});}
+function ready(){return !missingList().length;}
+function secDone(id){
+  if(id==='area')return !!(S.area&&coName());
+  if(id==='otype')return !!(S.otype&&(S.otype!=='oth'||S.otherType.trim()));
+  if(id==='photo')return S.pf.length>0;
   return S.found.trim().length>=10&&(gp()||S.rec.trim().length>=10);
 }
+function dirty(){return !!(S.found.trim()||S.rec.trim()||S.otype||S.pf.length||S.pa.length);}
 
-/* ---------------- form (L2: one long page, every section open) ---------------- */
-function head(i,en,th){return '<div class="sh"><span class="no">'+(secDone(i)?'✓':(i+1))+'</span><span class="tt">'+en+'<small>'+th+'</small></span></div>';}
+/* ---------------- form ---------------- */
+var SECN={};
+function head(id,en,th){return '<div class="sh"><span class="no">'+(secDone(id)?'✓':SECN[id])+'</span><span class="tt">'+en+'<span class="th">'+th+'</span></span></div>';}
+function lb(en,th,rq,extra){return '<span class="lb">'+(rq?'<span class="rq">*</span>':'')+en+(th?'<span class="th">'+th+'</span>':'')+(extra||'')+'</span>';}
 function cnt(v){var n=v.trim().length;return '<span class="cnt'+(n<10?' low':'')+'">'+n+'/10</span>';}
+function fmtLong(iso){if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||''))return '';var p=iso.split('-');return p[2]+' '+MON[+p[1]-1]+' '+p[0];}
 function secWhere(){
   var sub='';
   if(S.area==='BOP'){
     var opt=function(v,l){return '<option value="'+esc(v)+'"'+(S.subArea===v?' selected':'')+'>'+esc(l||v)+'</option>';};
-    sub='<label class="f"><span class="lb">BOP Area<span class="th">พื้นที่ย่อย · ไม่บังคับ</span></span><select class="inp" data-b="subArea"><option value="">— select —</option>'+
+    sub='<label class="f">'+lb('BOP Area','พื้นที่ย่อย')+'<select class="inp" data-b="subArea"><option value="">— select —</option>'+
       '<optgroup label="TANK Laydown Area">'+opt('TANK Laydown Area')+'</optgroup><optgroup label="BOP">'+
       (BOOT.subAreas||[]).map(function(x){return opt(x);}).join('')+opt('Other','Other / อื่นๆ — ระบุ')+'</optgroup></select></label>'+
       (S.subArea==='Other'?'<label class="f"><input class="inp" data-b="otherSub" value="'+esc(S.otherSub)+'" placeholder="Type the area name"></label>':'');
   }
-  return '<div class="card'+(secDone(0)?' done':'')+'" id="sec-area">'+head(0,'Where &amp; who','วันที่ · พื้นที่ · บริษัท')+'<div class="sb">'+
-    '<label class="f"><span class="lb"><span class="rq">*</span>Report date<span class="th">วันที่พบ (วันที่เห็นจริง)</span></span><input class="inp" type="date" data-b="date" max="'+BOOT.today+'" value="'+S.date+'"></label>'+
-    '<div class="f"><span class="lb"><span class="rq">*</span>Area<span class="th">พื้นที่</span></span><div class="tiles">'+
+  return '<div class="card'+(secDone('area')?' done':'')+'" id="sec-area">'+head('area','Date &amp; Location','วันที่ · สถานที่ · บริษัท')+'<div class="sb">'+
+    '<label class="f">'+lb('Report date','วันที่พบ',1)+'<div class="datebox"><div class="inp show">'+esc(fmtLong(S.date))+'</div>'+
+      '<input type="date" data-b="date" max="'+BOOT.today+'" value="'+S.date+'" aria-label="Report date"></div></label>'+
+    '<div class="f">'+lb('Area','พื้นที่',1)+'<div class="tiles">'+
       BOOT.areas.map(function(a){return '<button type="button" class="tile'+(S.area===a?' on':'')+'" data-area="'+esc(a)+'">'+esc(a)+'</button>';}).join('')+'</div></div>'+sub+
-    '<label class="f" id="sec-company"><span class="lb"><span class="rq">*</span>Company<span class="th">บริษัท</span></span><select class="inp" data-b="company"><option value="">— select —</option>'+
+    '<label class="f" id="sec-company">'+lb('Company','บริษัท',1)+'<select class="inp" data-b="company"><option value="">— select —</option>'+
       BOOT.companies.map(function(c){return '<option value="'+esc(c)+'"'+(S.company===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+
       '<option value="__other"'+(S.company==='__other'?' selected':'')+'>Other — type a name</option></select></label>'+
     (S.company==='__other'?'<label class="f"><input class="inp" data-b="otherCo" value="'+esc(S.otherCo)+'" placeholder="Type the company name"></label>':'')+
-    '<label class="f"><span class="lb">Specific location<span class="th">บริเวณที่พบ · ไม่บังคับ</span></span><input class="inp" data-b="loc" value="'+esc(S.loc)+'" placeholder="e.g. Roof rafter plate, Access tower B"></label>'+
+    '<label class="f">'+lb('Specific location','บริเวณที่พบ')+'<input class="inp" data-b="loc" value="'+esc(S.loc)+'" placeholder="e.g. Roof rafter plate, Access tower B"></label>'+
     '</div></div>';
 }
 function secType(){
-  var inner=gp()?'<div class="gpskip">Good Practice ไม่ต้องระบุลักษณะ</div>':
+  return '<div class="card'+(secDone('otype')?' done':'')+'" id="sec-otype">'+head('otype','Observation Type','ลักษณะที่พบ')+'<div class="sb">'+
     '<div class="tiles">'+OTYPES.map(function(o){return '<button type="button" class="tile'+(S.otype===o[0]?' on':'')+'" data-ot="'+o[0]+'">'+o[1]+'<small>'+o[2]+'</small></button>';}).join('')+'</div>'+
-    (S.otype==='oth'?'<input class="inp" style="margin-top:9px" data-b="otherType" value="'+esc(S.otherType)+'" placeholder="ระบุลักษณะที่พบ">':'');
-  return '<div class="card'+(secDone(1)?' done':'')+'" id="sec-otype">'+head(1,'Observation type','ลักษณะที่พบ')+'<div class="sb">'+inner+'</div></div>';
+    (S.otype==='oth'?'<input class="inp" style="margin-top:9px" data-b="otherType" value="'+esc(S.otherType)+'" placeholder="ระบุลักษณะที่พบ">':'')+'</div></div>';
 }
 function group(g,arr,label,req){
   var h=arr.map(function(src,i){return '<div class="slot has"><img src="'+src+'" alt=""><button type="button" class="x" data-del="'+g+'" data-i="'+i+'">&times;</button></div>';}).join('');
@@ -305,46 +366,70 @@ function group(g,arr,label,req){
   return '<div class="phd">'+label+'<span>'+arr.length+'/'+MAXP+'</span></div><div class="shot">'+h+'</div>';
 }
 function secPhoto(){
-  return '<div class="card'+(secDone(2)?' done':'')+'" id="sec-photo">'+head(2,'Photos','รูปภาพ')+'<div class="sb">'+
+  return '<div class="card'+(secDone('photo')?' done':'')+'" id="sec-photo">'+head('photo','Photos','รูปภาพ')+'<div class="sb">'+
     group('F',S.pf,'Photo — Found',true)+(gp()?'':group('A',S.pa,'Photo — After',false))+
     '<span class="hint">ถ่ายใหม่หรือเลือกจากอัลบั้มได้ · สูงสุด '+MAXP+' รูปต่อช่อง</span></div></div>';
 }
 function secDetail(){
   var dues=[[0,'Already closed',S.pa.length?'ปิดแล้ว · แก้จบหน้างาน':'ต้องมีรูป After ก่อน'],[1,'Tomorrow',dueDate(1)],[2,'+2 days',dueDate(2)],[3,'+3 days',dueDate(3)]];
-  return '<div class="card'+(secDone(3)?' done':'')+'" id="sec-found">'+head(3,'Details &amp; close due','รายละเอียด · กำหนดปิด')+'<div class="sb">'+
-    '<label class="f"><span class="lb"><span class="rq">*</span>What you found'+cnt(S.found)+'<span class="th">สิ่งที่พบ · พิมพ์ไทยได้ ระบบแปลให้</span></span><textarea class="inp" data-b="found" placeholder="e.g. พบนั่งร้านไม่มีป้ายตรวจสอบติดอยู่">'+esc(S.found)+'</textarea></label>'+
-    (gp()?'':'<label class="f" id="sec-rec"><span class="lb"><span class="rq">*</span>Recommendation'+cnt(S.rec)+'<span class="th">ข้อเสนอแนะ</span></span><textarea class="inp" data-b="rec" placeholder="สิ่งที่ต้องแก้ไข และวิธีป้องกันไม่ให้เกิดซ้ำ">'+esc(S.rec)+'</textarea></label>')+
-    '<div class="f"><span class="lb">Close due<span class="th">กำหนดปิดงาน'+(gp()?' · Good Practice ไม่ต้องปิด':'')+'</span></span><div class="tiles">'+
-      dues.map(function(d){var lock=gp()||(d[0]===0&&!S.pa.length);return '<button type="button" class="tile'+(!gp()&&S.due===d[0]?' on':'')+(lock?' dim':'')+'" data-due="'+d[0]+'">'+d[1]+'<small>'+d[2]+'</small></button>';}).join('')+
-    '</div>'+(!gp()&&S.due===0?'<span class="hint ok">แก้ไขจบหน้างานแล้ว — ระบบจะปิดรายการให้เลย</span>':'')+'</div>'+
+  return '<div class="card'+(secDone('found')?' done':'')+'" id="sec-found">'+head('found',gp()?'Details':'Details &amp; Close Due',gp()?'รายละเอียด':'รายละเอียด · กำหนดปิด')+'<div class="sb">'+
+    '<label class="f">'+lb('What you found','สิ่งที่พบเจอ',1,cnt(S.found))+'<textarea class="inp" data-b="found" placeholder="e.g. พบนั่งร้านไม่มีป้ายตรวจสอบติดอยู่">'+esc(S.found)+'</textarea></label>'+
+    (gp()?'':'<label class="f" id="sec-rec">'+lb('Recommendation','ข้อเสนอแนะ',1,cnt(S.rec))+'<textarea class="inp" data-b="rec" placeholder="สิ่งที่ต้องแก้ไข และวิธีป้องกันไม่ให้เกิดซ้ำ">'+esc(S.rec)+'</textarea></label>'+
+      '<div class="f">'+lb('Close due','กำหนดปิดงาน')+'<div class="tiles">'+
+      dues.map(function(d){var lock=d[0]===0&&!S.pa.length;return '<button type="button" class="tile'+(S.due===d[0]?' on':'')+(lock?' dim':'')+'" data-due="'+d[0]+'">'+d[1]+'<small>'+d[2]+'</small></button>';}).join('')+
+      '</div>'+(S.due===0?'<span class="hint ok">แก้ไขจบหน้างานแล้ว — ระบบจะปิดรายการให้เลย</span>':'')+'</div>')+
     '</div></div>';
 }
+
+/* ---------------- Ready to send (queue) ---------------- */
+function rptN(e){var n=Number(e&&e.repeat)||1;return n>=3?3:(n===2?2:1);}
+function qSub(e){
+  var a=e.area==='BOP'&&e.subArea?(e.subArea==='TANK Laydown Area'?'TANK Laydown Area':'BOP · '+(e.subArea==='Other'?(e.otherSub||'Other'):e.subArea)):e.area;
+  return [fmtLong(e.date).replace(/ \d{4}$/,''),a,e.company==='__other'?e.otherCo:e.company].filter(Boolean).join(' · ');
+}
+function queueHtml(){
+  if(!QUEUE.length)return '';
+  return '<div class="card"><div class="sh"><span class="tt">Ready to send<span class="th">พร้อมส่ง · '+QUEUE.length+'</span></span></div><div class="sb">'+
+    QUEUE.map(function(e,i){
+      var n=rptN(e),isgp=e.mode==='gp';
+      return '<div class="qcard"><div class="qtop"><span class="k '+(isgp?'g':'f')+'">'+(isgp?'GOOD PRACTICE':'FINDING')+'</span>'+
+        '<span class="qt">'+esc(e.found)+'</span>'+
+        (isgp?'':'<button type="button" class="flagpill'+(n===3?' on':(n===2?' on2':(FLAG_OPEN===i?' open':'')))+'" data-qflag="'+i+'">🚩'+(n>1?(n===2?' 2nd':' 3+'):'')+'</button>')+'</div>'+
+        '<div class="qsub">'+esc(qSub(e))+' · 📷 '+e.pf.length+'</div>'+
+        (FLAG_OPEN===i&&!isgp?'<div class="rpt"><span class="lb">Repeat finding?<span class="th">ยังไม่ได้แก้ไข</span></span><div class="tiles three">'+
+          [1,2,3].map(function(v){return '<button type="button" class="tile'+(n===v?' on':'')+(v>1?' rp'+v:'')+'" data-rpt="'+v+'" data-qi="'+i+'">'+['First Time','2nd Time','3+ Times'][v-1]+'</button>';}).join('')+'</div>'+
+          (n>1?'<span class="lb" style="margin-top:10px">Follow-up note<span class="th">เหตุผล / แจ้งไปแล้วเมื่อไร</span></span>'+
+            '<textarea class="inp" data-qnote="'+i+'" maxlength="300" placeholder="e.g. told CNT foreman 12 Sep and 16 Sep, still not replaced">'+esc(e.repeatNote||'')+'</textarea>':'')+'</div>':'')+
+        '<div class="qact"><button type="button" data-qedit="'+i+'">✎ Edit</button><button type="button" data-qdel="'+i+'">✕ Remove</button></div></div>';
+    }).join('')+'</div></div>';
+}
+
 function render(){
   var me=BOOT.me||{};
-  $('who').innerHTML=esc(me.nick||me.name||'')+' <span class="vf">verified · LINE</span><span class="frac" id="frac"></span>';
-  $('body').innerHTML=
-    '<div class="mode"><button type="button" class="find'+(gp()?'':' on')+'" data-mode="find">FINDING</button><button type="button" class="gp'+(gp()?' on':'')+'" data-mode="gp">GOOD PRACTICE</button></div>'+
-    '<div id="outnote"></div>'+secWhere()+secType()+secPhoto()+secDetail();
+  $('who').innerHTML=esc(me.name||me.nick||'')+' <span class="vf">verified · LINE</span>';
+  if(JUST_SAVED&&QUEUE.length){
+    $('body').innerHTML='<div id="outnote"></div><div class="savedok">✓ Saved · บันทึกแล้ว</div>'+queueHtml();
+  }else{
+    SECN={};var n=0;SECN.area=++n;if(!gp())SECN.otype=++n;SECN.photo=++n;SECN.found=++n;
+    $('body').innerHTML=
+      '<div class="mode"><button type="button" class="find'+(gp()?'':' on')+'" data-mode="find">FINDING</button><button type="button" class="gp'+(gp()?' on':'')+'" data-mode="gp">GOOD PRACTICE</button></div>'+
+      '<div id="outnote"></div>'+(EDIT_FROM?'<div class="note">กำลังแก้รายการที่ '+EDIT_FROM+' — กด Save เพื่อเก็บกลับเข้า Ready to send</div>':'')+
+      secWhere()+(gp()?'':secType())+secPhoto()+secDetail()+queueHtml();
+  }
   renderFoot();
   showOutboxNote();
 }
 function renderFoot(){
-  var m=missingList(), done=[0,1,2,3].filter(secDone).length;
-  $('frac').textContent=done+'/4';
-  $('progbar').style.width=(done/4*100)+'%';
-  var ok=!m.length;
-  $('foot').innerHTML='<button type="button" class="slim'+(ok?' ok':'')+'" id="slim"><b>'+(ok?'✓ Ready':m.length+' left')+'</b><span>'+
-    (ok?'ครบแล้ว ส่งได้เลย':esc(m[0][1]))+'</span>'+(ok?'':'<u>GO ›</u>')+'</button>'+
-    '<button type="button" class="btn" id="send" aria-disabled="'+(!ok||SENDING)+'">Send · ส่ง</button>';
-}
-function saveDraft(){lsSet(LS_DRAFT,{v:1,s:Object.assign({},S,{pf:[],pa:[]})});}   /* photos not kept: too big for storage */
-
-/* re-render while typing without losing the caret */
-function rerenderKeepFocus(){
-  var a=document.activeElement,key=a&&a.dataset?a.dataset.b:null,pos=null;
-  try{pos=a.selectionStart;}catch(e){}
-  render();
-  if(key){var e2=document.querySelector('[data-b="'+key+'"]');if(e2){e2.focus();try{if(pos!=null)e2.setSelectionRange(pos,pos);}catch(x){}}}
+  var sendBtn=QUEUE.length?'<button type="button" class="btn green" id="sendAll"'+(SENDING?' aria-disabled="true"':'')+'>Send All ('+QUEUE.length+')</button>':'';
+  if(JUST_SAVED&&QUEUE.length){
+    $('foot').innerHTML='<div class="btns"><button type="button" class="btn ghost" id="addMore">+ Add More</button>'+sendBtn+'</div>';
+    return;
+  }
+  var c=checks(),done=c.filter(function(x){return x[2];}).length,tot=c.length,ok=done===tot,nx=c.filter(function(x){return !x[2];})[0];
+  var seg=c.map(function(x){return '<span class="'+(x[2]?'on':'')+'"></span>';}).join('');
+  $('foot').innerHTML='<button type="button" class="pgo" id="slim"><span class="pmeta"><span>'+(ok?'✓ Ready to save':done+' / '+tot+' · next <b>'+esc(nx[1])+'</b>')+'</span>'+
+      (ok?'':'<span class="go">GO ›</span>')+'</span><span class="seg'+(ok?' done':'')+'">'+seg+'</span></button>'+
+    '<div class="btns"><button type="button" class="btn'+(QUEUE.length?' ghost':'')+'" id="save" aria-disabled="'+(!ok)+'">Save</button>'+sendBtn+'</div>';
 }
 
 /* ---------------- events ---------------- */
@@ -355,18 +440,32 @@ document.addEventListener('click',function(e){
   if(t.dataset.ot){S.otype=t.dataset.ot;saveDraft();render();return;}
   if(t.dataset.due!==undefined){if(t.classList.contains('dim'))return;S.due=+t.dataset.due;saveDraft();render();return;}
   if(t.dataset.cam){PICK=t.dataset.cam;$('picker').value='';$('picker').click();return;}
-  if(t.dataset.del){var arr=t.dataset.del==='F'?S.pf:S.pa;arr.splice(+t.dataset.i,1);if(!S.pa.length&&S.due===0)S.due=1;render();return;}
+  if(t.dataset.del){var arr=t.dataset.del==='F'?S.pf:S.pa;arr.splice(+t.dataset.i,1);if(!S.pa.length&&S.due===0)S.due=1;saveDraft();render();return;}
+  if(t.dataset.qflag!==undefined){var fi=+t.dataset.qflag;FLAG_OPEN=FLAG_OPEN===fi?-1:fi;render();return;}
+  if(t.dataset.rpt){var q=QUEUE[+t.dataset.qi];if(q){q.repeat=+t.dataset.rpt;if(q.repeat<2)q.repeatNote='';saveQueue();}render();return;}
+  if(t.dataset.qdel!==undefined){FLAG_OPEN=-1;QUEUE.splice(+t.dataset.qdel,1);saveQueue();if(!QUEUE.length)JUST_SAVED=false;render();return;}
+  if(t.dataset.qedit!==undefined){
+    if(dirty()&&!JUST_SAVED){alertBox('กด Save รายการที่กรอกอยู่ก่อน แล้วค่อยกลับมาแก้',true);return;}
+    var ix=+t.dataset.qedit;FLAG_OPEN=-1;S=Object.assign(blank(),QUEUE.splice(ix,1)[0]);saveQueue();saveDraft();
+    EDIT_FROM=ix+1;JUST_SAVED=false;render();$('scr').scrollTop=0;return;
+  }
   if(t.id==='slim'){var m=missingList();if(m.length)jump(m[0][0]);return;}
-  if(t.id==='send'){if(t.getAttribute('aria-disabled')==='true'){var mm=missingList();if(mm.length)jump(mm[0][0]);return;}send();return;}
+  if(t.id==='save'){if(!ready()){var mm=missingList();if(mm.length)jump(mm[0][0]);return;}
+    var at=EDIT_FROM?EDIT_FROM-1:QUEUE.length;QUEUE.splice(at,0,S);saveQueue();
+    var keep={date:S.date,mode:S.mode,area:S.area,subArea:S.subArea,otherSub:S.otherSub,company:S.company,otherCo:S.otherCo};
+    S=Object.assign(blank(),keep);saveDraft();   /* same walk, same place — keep date/area/company */
+    EDIT_FROM=0;JUST_SAVED=true;FLAG_OPEN=-1;render();$('scr').scrollTop=0;return;}
+  if(t.id==='addMore'){JUST_SAVED=false;render();$('scr').scrollTop=0;return;}
+  if(t.id==='sendAll'){if(t.getAttribute('aria-disabled')==='true')return;sendAll();return;}
 });
-document.addEventListener('input',function(e){var k=e.target.dataset&&e.target.dataset.b;if(!k||!S)return;S[k]=e.target.value;saveDraft();
-  if(e.target.tagName==='SELECT')render();else{renderFoot();var c=e.target.closest('.card');if(c){var i=['sec-area','sec-otype','sec-photo','sec-found'].indexOf(c.id);if(i>=0){c.classList.toggle('done',secDone(i));c.querySelector('.no').textContent=secDone(i)?'✓':(i+1);}}
-    var lb=e.target.closest('label');var ct=lb&&lb.querySelector('.cnt');if(ct){var n=e.target.value.trim().length;ct.textContent=n+'/10';ct.classList.toggle('low',n<10);}}});
-/* change re-renders ONLY for the date (due labels count from it). Text fields must not re-render on blur:
-   tapping the next field fires 'change' on the previous one, and a re-render would swap the field
-   the person just tapped for a new copy — the keyboard closes and what they type goes nowhere. */
+document.addEventListener('input',function(e){
+  if(e.target.dataset&&e.target.dataset.qnote!==undefined){var q=QUEUE[+e.target.dataset.qnote];if(q){q.repeatNote=e.target.value;saveQueue();}return;}
+  var k=e.target.dataset&&e.target.dataset.b;if(!k||!S)return;S[k]=e.target.value;saveDraft();
+  if(e.target.tagName==='SELECT')render();else{renderFoot();var c=e.target.closest('.card');if(c){var id={'sec-area':'area','sec-otype':'otype','sec-photo':'photo','sec-found':'found'}[c.id];if(id){c.classList.toggle('done',secDone(id));c.querySelector('.no').textContent=secDone(id)?'✓':SECN[id];}}
+    var lbl=e.target.closest('label');var ct=lbl&&lbl.querySelector('.cnt');if(ct){var n=e.target.value.trim().length;ct.textContent=n+'/10';ct.classList.toggle('low',n<10);}}});
+/* change re-renders ONLY for the date. Text fields must not re-render on blur (tapping the next field
+   fires 'change' on the previous one; a re-render swaps the tapped field and the keyboard closes). */
 document.addEventListener('change',function(e){var k=e.target.dataset&&e.target.dataset.b;if(!k||!S)return;S[k]=e.target.value;saveDraft();if(k==='date')render();});
-/* L2 cost (long page + keyboard): keep the field being typed in the middle of the screen */
 document.addEventListener('focusin',function(e){if(e.target.matches('.inp')){setTimeout(function(){try{e.target.scrollIntoView({block:'center',behavior:'smooth'});}catch(x){}},250);}});
 function jump(k){
   var map={area:'sec-area',company:'sec-company',otype:'sec-otype',photo:'sec-photo',found:'sec-found',rec:'sec-rec'};
@@ -380,7 +479,7 @@ $('picker').addEventListener('change',function(){
   var files=[].slice.call(this.files||[]);if(!files.length)return;
   var arr=PICK==='F'?S.pf:S.pa, room=MAXP-arr.length;
   files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);});});},Promise.resolve())
-    .then(function(){render();});
+    .then(function(){saveDraft();render();});
 });
 function shrink(file){
   return new Promise(function(res){
@@ -394,52 +493,67 @@ function shrink(file){
 }
 
 /* ---------------- send ---------------- */
-function otypeLabel(){if(gp())return 'Good Practice';if(S.otype==='oth')return S.otherType.trim();return (OTYPES.filter(function(o){return o[0]===S.otype;})[0]||[])[1]||'';}
-function payload(){
-  var sub=S.area==='BOP'?(S.subArea==='Other'?(S.otherSub.trim()||'Other'):S.subArea):'';
-  return {reportDate:S.date, company:coName(), area:S.area, subArea:sub, loc:S.loc.trim(),
-    cls:gp()?'Good Practice':'Observation', otype:otypeLabel(), cat:'', sub:'',
-    desc:S.found.trim(), rec:gp()?'':S.rec.trim(), due:gp()?0:S.due, closedNow:!gp()&&S.due===0,
-    photos:S.pf.slice(), photosAfter:gp()?[]:S.pa.slice(), photoAfter:gp()?'':(S.pa[0]||''), repeat:1, repeatNote:''};
+function otypeOf(e){if(e.mode==='gp')return 'Good Practice';if(e.otype==='oth')return String(e.otherType||'').trim();return (OTYPES.filter(function(o){return o[0]===e.otype;})[0]||[])[1]||'';}
+function payloadOf(e){
+  var isgp=e.mode==='gp',sub=e.area==='BOP'?(e.subArea==='Other'?(String(e.otherSub||'').trim()||'Other'):e.subArea):'';
+  var co=e.company==='__other'?String(e.otherCo||'').trim():e.company,n=rptN(e);
+  return {reportDate:e.date, company:co, area:e.area, subArea:sub, loc:String(e.loc||'').trim(),
+    cls:isgp?'Good Practice':'Observation', otype:otypeOf(e), cat:'', sub:'',
+    desc:e.found.trim(), rec:isgp?'':e.rec.trim(), due:isgp?0:e.due, closedNow:!isgp&&e.due===0,
+    photos:e.pf.slice(), photosAfter:isgp?[]:e.pa.slice(), photoAfter:isgp?'':(e.pa[0]||''),
+    repeat:isgp?1:n, repeatNote:(isgp||n<2)?'':String(e.repeatNote||'').trim()};
 }
 function overlay(on,txt,sub){$('overlay').classList.toggle('show',!!on);if(txt)$('ovtxt').textContent=txt;$('ovsub').textContent=sub||'';}
-function send(){
-  if(SENDING)return;SENDING=true;renderFoot();
-  var p=payload();
-  overlay(true,'Sending…','กำลังส่ง '+(p.photos.length+p.photosAfter.length)+' รูป');
-  api('submit',{payload:p}).then(function(r){
-    if(!r||!r.ok){SENDING=false;overlay(false);renderFoot();alertBox('ส่งไม่สำเร็จ: '+((r&&r.error)||'no response'));return;}
-    afterSent(r.data,p);
-  }).catch(function(){
-    /* network: keep it on the phone, send itself next time */
-    var out=lsGet(LS_OUT,[]);out.push(p);
-    if(!lsSet(LS_OUT,out)){SENDING=false;overlay(false);renderFoot();alertBox('เน็ตหลุด และเครื่องเก็บร่างไม่ได้ (รูปใหญ่เกิน) — ลองกด Send อีกครั้งเมื่อมีสัญญาณ');return;}
-    SENDING=false;overlay(false);S=blank();saveDraft();render();
-    alertBox('เน็ตหลุด — เก็บไว้ในเครื่องแล้ว จะส่งเองตอนเปิดฟอร์มครั้งหน้าที่มีสัญญาณ',true);
-  });
+/* one entry per call (photos make each call large); a failure keeps the rest in the queue */
+function sendAll(){
+  if(SENDING||!QUEUE.length)return;SENDING=true;renderFoot();
+  var total=QUEUE.length,sent=[],err='';
+  var finish=function(){
+    SENDING=false;JUST_SAVED=QUEUE.length>0;
+    if(!sent.length){overlay(false);render();alertBox('ส่งไม่สำเร็จ: '+err);return;}
+    afterSent(sent,err);
+  };
+  var step=function(){
+    if(!QUEUE.length)return finish();
+    var p=payloadOf(QUEUE[0]);
+    overlay(true,'Sending '+(sent.length+1)+' / '+total,'กำลังส่ง '+(p.photos.length+p.photosAfter.length)+' รูป');
+    api('submit',{payload:p}).then(function(r){
+      if(!r||!r.ok){err=(r&&r.error)||'no response';return finish();}
+      sent.push({id:(r.data&&r.data.id)||'',area:p.area,company:p.company});QUEUE.shift();saveQueue();step();
+    }).catch(function(){err='เน็ตหลุด — รายการที่เหลือยังอยู่ใน Ready to send กด Send All อีกครั้งเมื่อมีสัญญาณ';finish();});
+  };
+  step();
 }
-function afterSent(d,p){
-  var id=(d&&d.id)||'';
-  S=blank();saveDraft();SENDING=false;
-  var text='✅ ส่ง Observation แล้ว\n'+id+' · '+p.area+' · '+p.company;
-  var close=function(){overlay(false);if(liff.isInClient()){liff.closeWindow();}else{bare('<div class="big">✅</div><h2>ส่งแล้ว</h2><p>'+esc(id)+'</p><button class="btn" onclick="location.reload()">ส่งอีกเรื่อง</button>');}};
-  overlay(true,'✓ Sent',id);
-  /* the user's own message in the OA chat → webhook replies with the RECEIVED card (reply = free) */
+function afterSent(sent,err){
+  /* each text → webhook replies with up to 5 RECEIVED cards (reply = free). ≤5 ids per message, ≤5 messages per call. */
+  var msgs=[];
+  for(var i=0;i<sent.length&&msgs.length<5;i+=5){
+    var part=sent.slice(i,i+5);
+    msgs.push({type:'text',text:sent.length===1?('✅ ส่ง Observation แล้ว\n'+part[0].id+' · '+part[0].area+' · '+part[0].company)
+      :('✅ ส่ง Observation แล้ว '+sent.length+' รายการ\n'+part.map(function(s){return s.id+' · '+s.area+' · '+s.company;}).join('\n'))});
+  }
+  overlay(true,'✓ Sent '+sent.length,sent.map(function(s){return s.id;}).join(' · '));
+  var close=function(){
+    overlay(false);
+    if(err){render();alertBox('ส่งแล้ว '+sent.length+' รายการ · ที่เหลือส่งไม่สำเร็จ: '+err);return;}
+    if(liff.isInClient()){liff.closeWindow();}else{bare('<div class="big">✅</div><h2>ส่งแล้ว '+sent.length+' รายการ</h2><p>'+esc(sent.map(function(s){return s.id;}).join(', '))+'</p><button class="btn" onclick="location.reload()">ส่งเพิ่ม</button>');}
+  };
   if(liff.isInClient()&&liff.getContext()&&liff.getContext().type!=='none'){
-    liff.sendMessages([{type:'text',text:text}]).then(function(){setTimeout(close,500);}).catch(function(){setTimeout(close,900);});
+    liff.sendMessages(msgs).then(function(){setTimeout(close,500);}).catch(function(){setTimeout(close,900);});
   }else setTimeout(close,900);
 }
 function alertBox(msg,soft){var n=$('outnote');if(!n)return;n.innerHTML='<div class="'+(soft?'note':'err')+'">'+esc(msg)+'</div>';$('scr').scrollTop=0;}
+/* v2 outbox (pre-queue builds) — still drained so nothing left on a phone is lost */
 function showOutboxNote(){var out=lsGet(LS_OUT,[]);if(out.length&&$('outnote')&&!$('outnote').innerHTML)$('outnote').innerHTML='<div class="note">มี '+out.length+' รายการค้างส่งในเครื่อง — กำลังส่งให้อัตโนมัติ</div>';}
 function flushOutbox(){
   var out=lsGet(LS_OUT,[]);if(!out.length)return;
-  var p=out[0];
-  api('submit',{payload:p}).then(function(r){
-    if(r&&r.ok){out.shift();lsSet(LS_OUT,out);$('outnote').innerHTML='<div class="note" style="background:var(--green-bg);color:var(--green-text)">ส่งรายการที่ค้างแล้ว · '+esc(r.data&&r.data.id||'')+'</div>';if(out.length)flushOutbox();}
+  api('submit',{payload:out[0]}).then(function(r){
+    if(r&&r.ok){out.shift();lsSet(LS_OUT,out);if($('outnote'))$('outnote').innerHTML='<div class="note" style="background:var(--green-bg);color:var(--green-text)">ส่งรายการที่ค้างแล้ว · '+esc(r.data&&r.data.id||'')+'</div>';if(out.length)flushOutbox();}
   }).catch(function(){});
 }
 
 start();
+
 </script>
 </body>
 </html>
