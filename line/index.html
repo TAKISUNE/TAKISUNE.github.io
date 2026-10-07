@@ -179,7 +179,9 @@ textarea.inp{min-height:92px;resize:vertical}
 .pe-seg button i{display:block;width:16px;background:#c5cddb;border-radius:2px}
 .pe-seg button.on{background:#222b55}.pe-seg button.on i{background:#fff}
 #pestage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#16191f;padding-bottom:env(safe-area-inset-bottom)}
-#pecv{max-width:100%;max-height:100%;touch-action:none}
+#pecv{max-width:100%;max-height:100%;touch-action:none;transform-origin:50% 50%;will-change:transform}
+#pefit{all:unset;cursor:pointer;position:absolute;top:10px;right:10px;display:none;padding:7px 12px;border-radius:6px;background:rgba(20,26,35,.88);color:#fff;font-size:13px;font-weight:800;z-index:3}
+#pefit.on{display:block}
 #pecrop{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:none;justify-content:center;gap:10px}
 #pecrop.on{display:flex}
 #pecrop button{all:unset;cursor:pointer;padding:10px 18px;border-radius:6px;font-weight:800;font-size:14px;background:rgba(255,255,255,.14);color:#fff}
@@ -197,8 +199,8 @@ textarea.inp{min-height:92px;resize:vertical}
 <div class="overlay" id="overlay"><div class="box"><div class="spin"></div><div style="margin-top:10px" id="ovtxt">Sending…</div><small id="ovsub"></small></div></div>
 <input type="file" id="picker" accept="image/*" multiple hidden>
 <div id="pe" aria-modal="true" role="dialog"><div id="pebar"></div>
-  <div id="pestage"><canvas id="pecv"></canvas><div id="petoast"></div>
-    <div id="pecrop"><button type="button" id="pecropNo">ยกเลิก</button><button type="button" class="ok" id="pecropOk">✓ ครอป</button></div></div></div>
+  <div id="pestage"><canvas id="pecv"></canvas><div id="petoast"></div><button type="button" id="pefit">⤢ Fit</button>
+    <div id="pecrop"><button type="button" id="pecropNo">Cancel</button><button type="button" class="ok" id="pecropOk">✓ Crop</button></div></div></div>
 
 <script>
 /* ---------------- config (none of these are secrets) ---------------- */
@@ -224,32 +226,47 @@ function dueDate(n){var d=new Date((S.date||BOOT.today).replace(/-/g,'/'));d.set
 function blank(){return {mode:'find',date:BOOT.today,area:'',subArea:'',otherSub:'',company:'',otherCo:'',loc:'',otype:'',otherType:'',
   found:'',rec:'',due:1,pf:[],pa:[],pfx:[],pax:[]};}
 
-function api(action, extra){
+var _tokOk,TOKEN_P=new Promise(function(r){_tokOk=r;});
+function api(action, extra){return TOKEN_P.then(function(){
   var body = Object.assign({liff:1, action:action, idToken:TOKEN}, extra||{});
   return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'})
     .then(function(r){return r.json();});
-}
+});}
 
 /* ---------------- start ---------------- */
 var T0=Date.now(),BOOT_MS={};
 function bootStep(msg){var m=$('bootmsg');if(m)m.textContent=msg;}
 var _bt=setInterval(function(){var t=$('boott');if(!t||BOOT){clearInterval(_bt);return;}t.textContent=((Date.now()-T0)/1000).toFixed(1)+' s';},200);
+/* r3 7 Oct: boot took 8–10 s on site (LIFF init + Apps Script cold start). Stale-while-revalidate:
+   an approved user's last boot is cached; the form opens from it at once, the real boot runs behind and
+   only takes over if the binding changed. Submits are still verified server-side with the ID token. */
+var LS_BOOTC='line_obs_boot_cache_v1', FAST=false;
+function todayBKK(){return new Date(Date.now()+7*3600e3).toISOString().slice(0,10);}
 function start(){
-  bootStep('Signing in with LINE…');
+  var c=lsGet(LS_BOOTC,null);
+  if(c&&c.boot&&c.at&&(Date.now()-c.at)<14*864e5){FAST=c.sub||true;showForm(Object.assign({},c.boot,{today:todayBKK()}));}
+  else bootStep('Signing in with LINE…');
   liff.init({liffId:LIFF_ID}).then(function(){
     if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
     BOOT_MS.liff=Date.now()-T0;
-    TOKEN = liff.getIDToken() || '';
+    TOKEN = liff.getIDToken() || '';_tokOk();
+    var sub='';try{sub=(liff.getDecodedIDToken()||{}).sub||'';}catch(e){}
+    if(FAST&&FAST!==true&&sub&&FAST!==sub){FAST=false;lsSet(LS_BOOTC,null);location.reload();return;}   /* another LINE account on this phone */
     bootStep('Loading your form…');
-    return api('boot').then(function(r){BOOT_MS.server=Date.now()-T0-BOOT_MS.liff;BOOT_MS.total=Date.now()-T0;lsSet('line_obs_boot_ms',BOOT_MS);try{console.log('boot ms',JSON.stringify(BOOT_MS));}catch(e){}onBoot(r);});
-  }).catch(function(e){screenError('เปิดฟอร์มไม่สำเร็จ',String(e&&e.message||e));});
+    return api('boot').then(function(r){if(r&&r.ok&&r.status==='approved')lsSet(LS_BOOTC,{sub:sub,at:Date.now(),boot:r.boot});
+      else if(r&&r.ok)lsSet(LS_BOOTC,null);
+      if(FAST){if(r&&r.ok&&r.status==='approved'){BOOT=Object.assign(r.boot,{today:r.boot.today||todayBKK()});return;}if(!r||!r.ok)return;}BOOT_MS.server=Date.now()-T0-BOOT_MS.liff;BOOT_MS.total=Date.now()-T0;lsSet('line_obs_boot_ms',BOOT_MS);try{console.log('boot ms',JSON.stringify(BOOT_MS));}catch(e){}onBoot(r);});
+  }).catch(function(e){if(FAST){_tokOk();return;}screenError('เปิดฟอร์มไม่สำเร็จ',String(e&&e.message||e));});
 }
 function onBoot(r){
   if(!r||!r.ok){screenError('เปิดฟอร์มไม่สำเร็จ',(r&&r.error)||'no response');return;}
   if(r.status==='unbound'){screenBind(r.lineName);return;}
   if(r.status==='pending'){BIND.lineName=r.lineName||'';screenPending(r.officer);return;}
   if(r.status==='rejected'){screenError('บัญชี LINE นี้ยังใช้ฟอร์มไม่ได้','แจ้ง TK เพื่อตรวจสอบ');return;}
-  BOOT=r.boot;
+  showForm(r.boot);
+}
+function showForm(boot){
+  BOOT=boot;
   idbOpen().then(function(){return Promise.all([idbGet('queue'),idbGet('draft')]);}).then(function(v){
     QUEUE=Array.isArray(v[0])?v[0]:[];
     var d=lsGet(LS_DRAFT,null);
@@ -651,11 +668,11 @@ var PE=(function(){
       E.g=g;E.i=i;E.orig=c[0];E.base=c[1]||c[0];E.shapes=copyShapes(meta&&meta.shapes);E.fut=[];E.crop=null;E.tool='box';E.drag=null;
       E.hist=[];for(var k=0;k<E.shapes.length;k++)E.hist.push({base:E.base,shapes:copyShapes(E.shapes.slice(0,k))});
       $('pe').classList.add('on');document.body.style.overflow='hidden';bar();fit();draw();
-      toast(E.shapes.length?'กรอบเดิมยังอยู่ · ↶ ลบทีละอัน · ยางลบ = ล้างทั้งหมด':'ลากบนรูปเพื่อตีกรอบ',E.shapes.length?2600:1600);
+      toast(E.shapes.length?'กรอบเดิมยังอยู่ · ↶ ลบทีละอัน · ยางลบ = ล้างทั้งหมด':'ลากเพื่อตีกรอบ · 2 นิ้วเพื่อซูม',E.shapes.length?2600:2200);
     });
   }
   function close(){$('pe').classList.remove('on');document.body.style.overflow='';$('pecrop').classList.remove('on');E.base=E.orig=null;}
-  function fit(){var st=$('pestage'),W=st.clientWidth-16,H=st.clientHeight-16,b=E.base,k=Math.min(W/b.width,H/b.height);
+  function fit(){if(typeof resetZ==='function')resetZ();var st=$('pestage'),W=st.clientWidth-16,H=st.clientHeight-16,b=E.base,k=Math.min(W/b.width,H/b.height);
     cv.width=b.width;cv.height=b.height;cv.style.width=Math.round(b.width*k)+'px';cv.style.height=Math.round(b.height*k)+'px';}
   window.addEventListener('resize',function(){if(E.base&&$('pe').classList.contains('on')){fit();draw();}});
   function paint(g,s){
@@ -680,16 +697,39 @@ var PE=(function(){
       ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,cv.width/300);ctx.setLineDash([cv.width/60,cv.width/90]);ctx.strokeRect(c.x,c.y,c.w,c.h);ctx.setLineDash([]);}
   }
   function pt(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height];}
-  cv.addEventListener('pointerdown',function(e){
-    e.preventDefault();try{cv.setPointerCapture(e.pointerId);}catch(x){}var p=pt(e);
+  /* ---- r3 7 Oct: pinch-zoom / two-finger pan (one finger still draws). Listeners on the stage so the 2nd finger may land off the photo. ---- */
+  var Z={s:1,x:0,y:0},PTR={},PINCH=null,HOLD=false,stage=$('pestage');
+  function applyZ(){if(Z.s<=1.01){Z.s=1;Z.x=0;Z.y=0;}
+    var mx=(Z.s-1)*cv.clientWidth/2+40,my=(Z.s-1)*cv.clientHeight/2+40;Z.x=Math.max(-mx,Math.min(mx,Z.x));Z.y=Math.max(-my,Math.min(my,Z.y));
+    cv.style.transform=Z.s===1?'':'translate('+Z.x+'px,'+Z.y+'px) scale('+Z.s+')';$('pefit').classList.toggle('on',Z.s>1);}
+  function resetZ(){Z={s:1,x:0,y:0};PINCH=null;applyZ();}
+  function two(){var k=Object.keys(PTR);return [PTR[k[0]],PTR[k[1]]];}
+  function startPinch(){var p=two(),r=cv.getBoundingClientRect();
+    PINCH={d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1,mx:(p[0].x+p[1].x)/2,my:(p[0].y+p[1].y)/2,s:Z.s,x:Z.x,y:Z.y,
+      cx:r.left+r.width/2-Z.x,cy:r.top+r.height/2-Z.y};}
+  stage.addEventListener('pointerdown',function(e){
+    if(e.target.closest('button'))return;
+    e.preventDefault();try{stage.setPointerCapture(e.pointerId);}catch(x){}
+    PTR[e.pointerId]={x:e.clientX,y:e.clientY};
+    var n=Object.keys(PTR).length;
+    if(n>=2){                                   /* 2nd finger: drop the half-drawn mark, start pinch */
+      if(E.drag){if(E.drag.crop)E.crop=null;E.drag=null;draw();}
+      HOLD=true;if(n===2)startPinch();return;}
+    if(HOLD)return;
+    var p=pt(e);
     if(E.tool==='crop'){E.crop={x1:p[0],y1:p[1],x2:p[0],y2:p[1]};E.drag={crop:1};$('pecrop').classList.remove('on');draw();return;}
     var s={t:E.tool,c:E.color,w:lwFor(E.size),x1:p[0],y1:p[1],x2:p[0],y2:p[1]};if(E.tool==='pen')s.pts=[p];
     E.drag={s:s};
   });
-  cv.addEventListener('pointermove',function(e){
-    if(!E.drag)return;var p=pt(e);
-    if(E.drag.crop){E.crop.x2=Math.max(0,Math.min(cv.width,p[0]));E.crop.y2=Math.max(0,Math.min(cv.height,p[1]));draw();return;}
-    var s=E.drag.s;s.x2=p[0];s.y2=p[1];if(s.t==='pen')s.pts.push(p);draw();
+  stage.addEventListener('pointermove',function(e){
+    if(PTR[e.pointerId]){PTR[e.pointerId].x=e.clientX;PTR[e.pointerId].y=e.clientY;}
+    if(PINCH&&Object.keys(PTR).length>=2){var p=two(),d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),mx=(p[0].x+p[1].x)/2,my=(p[0].y+p[1].y)/2;
+      var ns=Math.max(1,Math.min(6,PINCH.s*d/PINCH.d));
+      var qx=(PINCH.mx-PINCH.cx-PINCH.x)/PINCH.s,qy=(PINCH.my-PINCH.cy-PINCH.y)/PINCH.s;   /* photo point under the fingers stays put */
+      Z.s=ns;Z.x=mx-PINCH.cx-ns*qx;Z.y=my-PINCH.cy-ns*qy;applyZ();return;}
+    if(!E.drag||HOLD)return;var q=pt(e);
+    if(E.drag.crop){E.crop.x2=Math.max(0,Math.min(cv.width,q[0]));E.crop.y2=Math.max(0,Math.min(cv.height,q[1]));draw();return;}
+    var s=E.drag.s;s.x2=q[0];s.y2=q[1];if(s.t==='pen')s.pts.push(q);draw();
   });
   function endDrag(){
     if(!E.drag)return;
@@ -699,7 +739,13 @@ var PE=(function(){
     if(big){snap();E.shapes.push(s);bar();}
     draw();
   }
-  cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
+  function ptrUp(e){delete PTR[e.pointerId];var n=Object.keys(PTR).length;
+    if(n<2)PINCH=null;if(n===0){if(HOLD){HOLD=false;return;}endDrag();}}
+  stage.addEventListener('pointerup',ptrUp);stage.addEventListener('pointercancel',ptrUp);
+  stage.addEventListener('wheel',function(e){e.preventDefault();var r=cv.getBoundingClientRect(),cx=r.left+r.width/2-Z.x,cy=r.top+r.height/2-Z.y,
+    qx=(e.clientX-cx-Z.x)/Z.s,qy=(e.clientY-cy-Z.y)/Z.s,ns=Math.max(1,Math.min(6,Z.s*(e.deltaY<0?1.15:1/1.15)));
+    Z.s=ns;Z.x=e.clientX-cx-ns*qx;Z.y=e.clientY-cy-ns*qy;applyZ();},{passive:false});
+  $('pefit').onclick=function(e){e.stopPropagation();resetZ();};
   function bake(){var c=cloneCanvas(E.base),g=c.getContext('2d');E.shapes.forEach(function(s){paint(g,s);});return c;}
   $('pecropOk').onclick=function(){var r=norm(E.crop);snap();var b=bake(),c=document.createElement('canvas');c.width=Math.round(r.w);c.height=Math.round(r.h);
     c.getContext('2d').drawImage(b,r.x,r.y,r.w,r.h,0,0,c.width,c.height);E.base=c;E.shapes=[];E.crop=null;$('pecrop').classList.remove('on');E.tool='box';fit();draw();bar();toast('ครอปแล้ว');};
@@ -707,11 +753,11 @@ var PE=(function(){
   function rotate(){snap();var b=bake(),c=document.createElement('canvas');c.width=b.height;c.height=b.width;var g=c.getContext('2d');
     g.translate(c.width,0);g.rotate(Math.PI/2);g.drawImage(b,0,0);E.base=c;E.shapes=[];fit();draw();bar();}
   function bar(){
-    $('pebar').innerHTML='<div class="pe-hdr"><div class="l"><button type="button" class="pe-cancel" data-pa="cancel">ยกเลิก</button></div><div class="pe-ur">'+
+    $('pebar').innerHTML='<div class="pe-hdr"><div class="l"><button type="button" class="pe-cancel" data-pa="cancel">Cancel</button></div><div class="pe-ur">'+
       '<button type="button" data-pa="undo"'+(E.hist.length?'':' disabled')+' aria-label="Undo">'+ic('undo')+'</button>'+
       '<button type="button" data-pa="redo"'+(E.fut.length?'':' disabled')+' aria-label="Redo">'+ic('redo')+'</button>'+
       '<span class="pe-dv"></span><button type="button" data-pa="reset"'+(canReset()?'':' disabled')+' aria-label="ล้างทั้งหมด">'+ic('erase')+'</button></div>'+
-      '<div class="r"><button type="button" class="pe-done" data-pa="done">เสร็จ</button></div></div>'+
+      '<div class="r"><button type="button" class="pe-done" data-pa="done">Done</button></div></div>'+
       '<div class="pe-tools">'+TOOLS.map(function(t){return '<button type="button" class="pe-tl'+(E.tool===t[0]?' on':'')+'" data-pt="'+t[0]+'">'+ic(t[0])+t[1]+'</button>';}).join('')+'</div>'+
       '<div class="pe-style"><div class="pe-cols">'+COLS.map(function(c){return '<button type="button" class="pe-sw'+(E.color===c?' on':'')+'" data-pc="'+c+'" style="background:'+c+'"></button>';}).join('')+
       '</div><div class="pe-seg">'+[2,4,7].map(function(h,i){return '<button type="button" data-psz="'+i+'"'+(E.size===i?' class="on"':'')+'><i style="height:'+h+'px"></i></button>';}).join('')+'</div></div>';
