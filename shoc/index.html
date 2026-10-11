@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>SHOC · GMTP Contractor</title>
-<!-- 11 Oct 2026 · Contractor SHOC LIFF form (shoc/ v0.1). Public page: NO secrets.
+<!-- 11 Oct 2026 · Contractor SHOC LIFF form (shoc/ v0.5: photo editor D1/E1 ported from PCC, Other area/type, sent screen = Claude Design E7 + stamp S1). Public page: NO secrets.
      Identity = LIFF ID token, verified server-side (SHOC Data Service / Shoc.js).
      Decisions: theme G2 Mint+Teal · F1 field order · Save → Ready to send → Send All · 6 observation classes ·
      first open through a company link ?c=<InviteCode> → type real name once (B2) · confirmation in-form only (S1). -->
@@ -41,7 +41,6 @@ body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;displ
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
 .lbl{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:14px;margin:0 0 6px}
 .lbl small{font-weight:400;color:var(--muted);font-size:11.5px}
-.lbl .req{color:var(--crit);font-weight:700;margin-left:3px}
 .inp,select,textarea{width:100%;border:1px solid var(--border2);background:var(--card);color:var(--text);border-radius:var(--rc);padding:11px 12px;font:inherit;font-size:16px}
 textarea{min-height:76px;resize:vertical}
 select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
@@ -89,26 +88,114 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 #overlay .sp{width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite;margin-bottom:12px}
 .done .n{font-size:46px;font-weight:800;color:var(--accent);line-height:1.1}
 .done .ck{width:76px;height:76px;border-radius:50%;background:var(--accent);color:#fff;font-size:40px;line-height:76px;margin:0 auto 12px}
+
+.lbl .req{color:var(--crit);font-weight:700;margin-left:2px}
+.tile{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pho .th .edbtn{all:unset;cursor:pointer;position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:4px;border-radius:10px}
+.pho .th .edbtn span{background:rgba(15,42,38,.78);color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px}
+.pho .th .edtag{position:absolute;top:4px;left:4px;background:var(--accent);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;pointer-events:none}
+.sub2{margin-top:8px}
+/* ---- photo editor (D1 + E1, ported from PCC r5 · teal accent) ---- */
+#pe{position:fixed;inset:0;background:#0b0f15;display:none;flex-direction:column;z-index:200;touch-action:none;user-select:none;-webkit-user-select:none;color:#fff}
+#pe.on{display:flex}
+#pe>*{width:100%;max-width:480px;align-self:center}
+#pebar{flex:none;background:#0d1219;padding-top:env(safe-area-inset-top);border-bottom:1px solid #1d2430}
+.pe-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px}
+.pe-hdr .l,.pe-hdr .r{flex:1;display:flex}.pe-hdr .r{justify-content:flex-end}
+.pe-cancel{all:unset;cursor:pointer;font-size:15px;font-weight:700;color:#e8ecf3;padding:8px 6px}
+.pe-ur{display:flex;gap:6px;align-items:center}
+.pe-ur button{all:unset;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;color:#fff;border-radius:8px}
+.pe-ur button svg{width:24px;height:24px}
+.pe-ur button[disabled]{color:#4a5363;cursor:default}
+.pe-ur .pe-draw.on{background:#3FBFA9;color:#06201B}
+.pe-tools.locked,.pe-style.locked{opacity:.35}
+.pe-dv{width:1px;height:22px;background:#2a3240;margin:0 2px}
+.pe-done{all:unset;cursor:pointer;background:#3FBFA9;color:#06201B;font-size:15px;font-weight:800;padding:10px 20px;border-radius:6px}
+.pe-tools{display:flex;padding:4px 10px 6px}
+.pe-tl{all:unset;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;color:#aab3c2;font-size:11.5px;font-weight:700;padding:8px 0 7px;border-radius:6px}
+.pe-tl svg{width:22px;height:22px}
+.pe-tl.on{background:#133630;color:#fff}.pe-tl.on svg{color:#9FE3D5}
+.pe-style{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px;gap:10px}
+.pe-cols{display:flex;gap:16px}
+.pe-sw{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%}
+.pe-sw.on{box-shadow:0 0 0 3px #0d1219,0 0 0 5px #fff}
+.pe-seg{display:flex;border:1px solid #2a3240;border-radius:6px;overflow:hidden;background:#141a23}
+.pe-seg button{all:unset;cursor:pointer;width:46px;height:38px;display:grid;place-items:center}
+.pe-seg button+button{border-left:1px solid #2a3240}
+.pe-seg button i{display:block;width:16px;background:#c5cddb;border-radius:2px}
+.pe-seg button.on{background:#133630}.pe-seg button.on i{background:#fff}
+#pestage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#16191f;padding-bottom:env(safe-area-inset-bottom)}
+#pecv{max-width:100%;max-height:100%;touch-action:none;transform-origin:50% 50%;will-change:transform}
+#pefit{all:unset;cursor:pointer;position:absolute;top:10px;right:10px;display:none;padding:7px 12px;border-radius:6px;background:rgba(20,26,35,.88);color:#fff;font-size:13px;font-weight:800;z-index:3}
+#pefit.on{display:block}
+#pecrop{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:none;justify-content:center;gap:10px}
+#pecrop.on{display:flex}
+#pecrop button{all:unset;cursor:pointer;padding:10px 18px;border-radius:6px;font-weight:800;font-size:14px;background:rgba(255,255,255,.14);color:#fff}
+#pecrop .ok{background:#3FBFA9;color:#06201B}
+#petoast{position:absolute;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);color:#16202c;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#petoast.on{opacity:1}
+/* ---- sent screen · Claude Design "E7 + stamp S1" (11 Oct 2026) ---- */
+#scr.sent{padding:0;overflow:hidden;position:relative;background:var(--bg)}
+.dn{position:absolute;inset:0;display:flex;flex-direction:column}
+.dn .wave{position:absolute;left:0;right:0;top:0;height:100%;background:var(--accent);transform:translateY(100%);
+  animation:dn-rise .5s cubic-bezier(.3,0,.2,1) .15s both,dn-settle .6s cubic-bezier(.6,0,.2,1) .8s forwards}
+.dn .hero{position:relative;height:248px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff}
+.dn .bw{width:84px;height:84px;margin-bottom:8px}
+.dn .badge{width:84px;height:84px;animation:dn-drop .6s cubic-bezier(.2,1.3,.4,1) .5s both}
+.dn .badge svg{display:block;width:84px;height:84px}
+.dn .cc{fill:#fff;stroke:#fff;stroke-width:6}.dn .ck{fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.dn .h{font-size:26px;font-weight:700;line-height:1.2}
+.dn .t{font-size:16px;font-weight:500;color:#D7EFE9}
+.dn .chip{margin-top:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.16);padding:6px 12px;border-radius:999px;letter-spacing:.3px;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dn .in{opacity:0;transform:translateY(12px);transition:opacity .4s ease calc(1.25s + var(--d)),transform .5s cubic-bezier(.2,.9,.3,1) calc(1.25s + var(--d))}
+.dn.on .in{opacity:1;transform:none}
+.dn .dbody{position:relative;flex:1;display:flex;flex-direction:column;gap:14px;padding:18px 18px 20px;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.dn .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dn .st{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.dn .st b{font-size:12px;font-weight:500;color:var(--text2)}
+.dn .st i{font-style:normal;font-size:32px;font-weight:700;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
+.dn .nr{display:flex;align-items:baseline;gap:6px}.dn .st small{font-size:12px;color:var(--text2);font-weight:500}
+.dn .sslot{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0 22px}
+.dn .stamp{color:var(--accent);line-height:1;opacity:0;transform:rotate(-6deg);animation:dn-stamp .4s cubic-bezier(.5,0,.6,1.4) 1.6s both;position:relative}
+.dn .stamp .grain2{position:absolute;inset:-8px;pointer-events:none;background:linear-gradient(105deg,rgba(241,247,245,0) 0 60%,rgba(241,247,245,.55) 75%,rgba(241,247,245,0) 90%)}
+.dn .stamp .o{border:4px solid;border-radius:14px;padding:4px}
+.dn .stamp .i2{border:1.5px solid;border-radius:9px;padding:9px 18px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.dn .stamp .big{font-size:26px;font-weight:700;letter-spacing:4px}.dn .stamp .dt{font-size:11px;font-weight:700;letter-spacing:3px}
+.dn .stamp .grain{position:absolute;inset:-8px;pointer-events:none;opacity:.85;background-image:radial-gradient(circle,var(--bg) 0 1.2px,transparent 1.6px),radial-gradient(circle,var(--bg) 0 .8px,transparent 1.2px),radial-gradient(ellipse 6px 2px,var(--bg) 0 50%,transparent 60%);background-size:13px 11px,7px 9px,37px 23px;background-position:0 0,3px 5px,11px 7px}
+.dn .acts{display:flex;flex-direction:column;gap:8px}
+.dn .a1{height:50px;border-radius:14px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:700;border:0}
+.dn .a2{height:44px;border-radius:14px;background:transparent;color:var(--accent);font:inherit;font-size:15px;font-weight:600;border:0}
+.dn.on.shake{animation:dn-shake .25s linear 1.95s}
+.dn .note{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px}
+@keyframes dn-rise{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes dn-settle{from{height:100%}to{height:248px}}
+@keyframes dn-drop{0%{transform:translateY(-180px);opacity:0}60%{transform:translateY(8px);opacity:1}100%{transform:none;opacity:1}}
+@keyframes dn-stamp{0%{transform:rotate(-6deg) scale(2.6);opacity:0}70%{transform:rotate(-6deg) scale(.94);opacity:.93}100%{transform:rotate(-6deg) scale(1);opacity:.93}}
+@keyframes dn-shake{0%,100%{transform:none}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,1px)}}
+@media (prefers-reduced-motion:reduce){.dn .wave,.dn .badge,.dn .stamp,.dn.on.shake{animation-duration:.01s;animation-delay:0s}.dn .in{transition-delay:0s}}
 </style>
 </head>
 <body>
 <div class="appbar" id="appbar" hidden>
-  <div class="t"><span>ส่ง SHOC</span><small id="ver"></small></div>
+  <div class="t"><span>Safety Hazard Observation Card</span><small id="ver"></small></div>
   <div class="who" id="who"></div>
 </div>
 <div class="rbar" id="rbar" hidden><span>Ready to send (<span id="rn">0</span>)</span><span>View ›</span></div>
 <div id="scr"><div class="boot" id="bootbox"><div class="sp"></div><div id="bootmsg">กำลังเข้าสู่ระบบด้วย LINE…</div><div style="font-size:11px;margin-top:6px" id="boott"></div></div></div>
 <div class="foot" id="foot" hidden></div>
 <input type="file" id="picker" accept="image/*" multiple hidden>
+<div id="pe" aria-modal="true" role="dialog"><div id="pebar"></div>
+  <div id="pestage"><canvas id="pecv"></canvas><div id="petoast"></div><button type="button" id="pefit">⤢ Fit</button>
+    <div id="pecrop"><button type="button" id="pecropNo">Cancel</button><button type="button" class="ok" id="pecropOk">✓ Crop</button></div></div></div>
 <div id="overlay"><div class="sp"></div><div id="ovtxt" style="font-weight:700"></div><div id="ovsub" style="font-size:13px;opacity:.85;margin-top:4px"></div></div>
 <script>
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'shoc-page v0.3';
+var PAGE_VER = 'v0.5';
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
 var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
-  'Near Miss':['เหตุการณ์เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','#2E8F62'],
+  'Near Miss':['เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','#2E8F62'],
   'Good Practice':['การปฏิบัติที่ดี','var(--blue)'],'Other':['อื่นๆ','var(--muted)']};
 var LS_BOOTC='shoc_boot_cache_v1', LS_DRAFT='shoc_draft_v1';
 
@@ -123,7 +210,7 @@ var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
 function fmtDate(iso){if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||''))return '';var p=iso.split('-');return ('0'+p[2]).slice(-2)+' '+MON[+p[1]-1]+' '+p[0];}
 function todayBKK(){return new Date(Date.now()+7*3600e3).toISOString().slice(0,10);}
 function uid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
-function blank(){return {date:(BOOT&&BOOT.today)||todayBKK(),area:'',subArea:'',type:'',desc:'',act:'',pf:[],pa:[]};}
+function blank(){return {date:(BOOT&&BOOT.today)||todayBKK(),area:'',subArea:'',type:'',typeOther:'',desc:'',act:'',pf:[],pa:[],pfx:[],pax:[]};}
 function inviteCode(){
   var m=/[?&]c=([^&#]+)/.exec(location.search||'');if(m)return decodeURIComponent(m[1]);
   try{var st=/[?&]liff\.state=([^&#]+)/.exec(location.search||'');if(st){var q=decodeURIComponent(st[1]);var m2=/[?&]?c=([^&#]+)/.exec(q);if(m2)return decodeURIComponent(m2[1]);}}catch(e){}
@@ -172,22 +259,22 @@ function showForm(boot){
     var d=lsGet(LS_DRAFT,null);
     S=v[1]?Object.assign(blank(),v[1]):(d?Object.assign(blank(),d):blank());
     if(!S.date)S.date=BOOT.today;
-    $('appbar').hidden=false;$('foot').hidden=false;$('ver').textContent=PAGE_VER;
+    $('appbar').hidden=false;$('foot').hidden=false;$('ver').textContent=PAGE_VER;$('scr').className='';
     renderWho();render();
   });
 }
 
 /* ---------------- screens ---------------- */
-function bare(html){$('appbar').hidden=true;$('foot').hidden=true;$('rbar').hidden=true;$('scr').innerHTML='<div class="screen">'+html+'</div>';}
+function bare(html){$('appbar').hidden=true;$('foot').hidden=true;$('rbar').hidden=true;$('scr').className='';$('scr').innerHTML='<div class="screen">'+html+'</div>';}
 function screenError(t,msg){bare('<div class="big">⚠️</div><h2>'+esc(t)+'</h2><div class="err">'+esc(msg)+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button>');}
 function screenRegister(r,err){
   bare('<img class="av" src="'+esc(r.picture||'')+'" alt="" onerror="this.style.visibility=\'hidden\'">'+
     '<h2 style="margin-top:12px">'+esc(r.lineName||'')+'</h2><p style="font-size:12.5px">ชื่อและรูปจาก LINE ของคุณ</p>'+
     '<div class="cobox"><span>บริษัท <small style="color:var(--muted)">(จากลิงก์)</small></span><b>'+esc(r.companyName||r.company)+'</b></div>'+
-    '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ชื่อไทยหรืออังกฤษ</small></span></div>'+
+    '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ชื่อไทยหรืออังกฤษก็ได้</small></span></div>'+
     '<input class="inp" id="rn_name" placeholder="" autocomplete="name">'+
     (err?'<div class="err">'+esc(err)+'</div>':'')+
-    '<button class="btn" id="rn_go" style="width:100%">เริ่มใช้งาน</button>');
+    '<button class="btn" id="rn_go" style="width:100%;margin-top:16px">เริ่มใช้งาน</button>');
   $('rn_go').onclick=function(){
     var n=($('rn_name').value||'').trim();if(n.length<3){screenRegister(r,'กรุณาพิมพ์ชื่อ-นามสกุลจริง');return;}
     this.disabled=true;this.textContent='กำลังลงทะเบียน…';
@@ -199,12 +286,28 @@ function screenRegister(r,err){
 }
 function screenSent(sent,err){
   var c=(sent[sent.length-1]&&sent[sent.length-1].counts)||(BOOT&&BOOT.counts)||{today:0,month:0};
-  bare('<div class="done"><div class="ck">✓</div><h2>ส่งแล้ว '+sent.length+' ใบ ขอบคุณค่ะ</h2><p style="font-size:12.5px">'+esc(sent.map(function(s){return s.id;}).join(' · '))+'</p>'+
-    (err?'<div class="note">'+esc(err)+'</div>':'')+
-    '<div style="margin-top:22px;color:var(--text2);font-size:13px">วันนี้คุณส่งแล้ว</div><div class="n">'+c.today+'</div><div style="color:var(--text2);font-size:13px">เดือนนี้ <b>'+c.month+'</b> ใบ</div></div>'+
-    '<button class="btn" style="width:100%;margin-top:26px" onclick="VIEW=\'form\';SAVED_FLASH=false;$(\'appbar\').hidden=false;$(\'foot\').hidden=false;render();">+ ส่งอีกใบ</button>'+
-    (window.liff&&liff.isInClient&&liff.isInClient()?'<button class="btn ghost" style="width:100%;margin-top:10px" onclick="liff.closeWindow()">ปิด</button>':''));
+  var ids=sent.map(function(x){return x.id;}).filter(String);
+  var d=new Date(Date.now()+7*3600e3),stampDate=('0'+d.getUTCDate()).slice(-2)+' '+MON[d.getUTCMonth()].toUpperCase()+' '+d.getUTCFullYear();
+  $('appbar').hidden=true;$('foot').hidden=true;$('rbar').hidden=true;
+  var scr=$('scr');scr.className='sent';
+  scr.innerHTML='<div class="dn shake" id="dn"><div class="wave"></div>'+
+    '<div class="hero"><div class="bw"><div class="badge"><svg viewBox="0 0 96 96"><circle class="cc" cx="48" cy="48" r="42"/><path class="ck" d="M30 49 L43 62 L67 36"/></svg></div></div>'+
+    '<div class="h in" style="--d:0s">ส่งแล้ว '+sent.length+' ใบ</div><div class="t in" style="--d:.06s">Thank you</div>'+
+    (ids.length?'<div class="chip in" style="--d:.1s">'+esc(ids.length>2?ids[0]+' … '+ids[ids.length-1]:ids.join(' · '))+'</div>':'')+'</div>'+
+    '<div class="dbody">'+(err?'<div class="note in" style="--d:.1s">'+esc(err)+'</div>':'')+
+    '<div class="stats"><div class="st in" style="--d:.2s"><b>วันนี้คุณส่งแล้ว</b><div class="nr"><i class="num" data-to="'+(+c.today||0)+'">0</i><small>ใบ</small></div></div>'+
+    '<div class="st in" style="--d:.28s"><b>เดือนนี้</b><div class="nr"><i class="num" data-to="'+(+c.month||0)+'">0</i><small>ใบ</small></div></div></div>'+
+    '<div class="sslot"><div class="stamp"><div class="o"><div class="i2"><div class="big">SUBMITTED</div><div class="dt">'+stampDate+'</div></div></div><div class="grain"></div><div class="grain2"></div></div></div>'+
+    '<div class="acts in" style="--d:.36s"><button class="a1" id="dnMore">ส่ง SHOC ใบใหม่</button>'+
+    (window.liff&&liff.isInClient&&liff.isInClient()?'<button class="a2" onclick="liff.closeWindow()">ปิดหน้านี้</button>':'')+'</div></div></div>';
+  $('dnMore').onclick=function(){VIEW='form';SAVED_FLASH=false;scr.className='';$('appbar').hidden=false;$('foot').hidden=false;render();};
   if(BOOT)BOOT.counts=c;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){$('dn').classList.add('on');countUp(1.45);});});
+}
+function countUp(base){
+  var nodes=$('scr').querySelectorAll('.num');
+  nodes.forEach(function(n,i){var to=+n.getAttribute('data-to')||0,start=performance.now()+(base+.25+i*.08)*1000,dur=700;
+    (function f(now){var p=Math.min(1,Math.max(0,(now-start)/dur));n.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f);})(performance.now());});
 }
 
 /* ---------------- IndexedDB (queue + draft with photos) ---------------- */
@@ -214,15 +317,15 @@ function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open('sh
 function idbGet(k){return new Promise(function(res){if(!IDB)return res(null);try{var q=IDB.transaction('kv').objectStore('kv').get(k);q.onsuccess=function(){res(q.result||null);};q.onerror=function(){res(null);};}catch(e){res(null);}});}
 function idbPut(k,v){if(!IDB)return;try{IDB.transaction('kv','readwrite').objectStore('kv').put(v,k);}catch(e){}}
 var _dT=null;
-function saveDraft(){lsSet(LS_DRAFT,Object.assign({},S,{pf:[],pa:[]}));clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
+function saveDraft(){lsSet(LS_DRAFT,Object.assign({},S,{pf:[],pa:[],pfx:[],pax:[]}));clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
 function saveQueue(){idbPut('queue',QUEUE);}
 
 /* ---------------- validation ---------------- */
 function subAreasFor(a){return (BOOT&&BOOT.subAreas&&BOOT.subAreas[a])||[];}
 function missing(){
   var m=[];
-  if(!S.area)m.push('พื้นที่');
-  if(!S.type)m.push('ประเภท');
+  if(!S.area)m.push('พื้นที่');else if(S.area==='Other'&&!(S.subArea||'').trim())m.push('ระบุพื้นที่');
+  if(!S.type)m.push('ประเภท');else if(S.type==='Other'&&!(S.typeOther||'').trim())m.push('ระบุประเภท');
   if(!S.pf.length)m.push('รูป');
   if(S.desc.trim().length<3)m.push('สิ่งที่พบเจอ');
   return m;
@@ -232,7 +335,7 @@ function missing(){
 function renderWho(){
   if(!BOOT)return;
   var me=BOOT.me||{};
-  $('who').innerHTML='👷 '+esc(me.name||me.lineName||'')+' <span class="tag">'+esc(me.company||'')+'</span>'+(me.matched?'':' <span class="tag unv">ยังไม่ยืนยัน</span>');
+  $('who').innerHTML=esc(me.name||me.lineName||'')+' <span class="tag">'+esc(me.company||'')+'</span>'+(me.matched?'':' <span class="tag unv">ยังไม่ยืนยัน</span>');
 }
 function render(){
   if(!BOOT||!S)return;
@@ -240,16 +343,19 @@ function render(){
   if(VIEW==='queue')renderQueue();else renderForm();
 }
 function renderForm(){
-  var areas=BOOT.areas||[],subs=subAreasFor(S.area),types=BOOT.types||Object.keys(TYPE_META);
+  var areas=BOOT.areas||[],subs=S.area==='Other'?[]:subAreasFor(S.area),types=BOOT.types||Object.keys(TYPE_META);
   var h='';
   h+='<div class="card"><div class="lbl"><span>วันที่ <small>Date</small></span></div><div class="datebox"><input class="inp show" value="'+esc(fmtDate(S.date))+'" readonly><input type="date" id="fDate" value="'+esc(S.date)+'" max="'+esc(BOOT.today)+'"></div></div>';
-  h+='<div class="card"><div class="lbl"><span>พื้นที่ <span class="req">*</span><small>Area</small></span></div><select id="fArea"><option value="">— เลือกพื้นที่ —</option>'+areas.map(function(a){return '<option'+(a===S.area?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
-  if(subs.length)h+='<div style="height:8px"></div><select id="fSub"><option value="">— จุดย่อย (ไม่บังคับ) —</option>'+subs.map(function(a){return '<option'+(a===S.subArea?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
+  h+='<div class="card"><div class="lbl"><span>พื้นที่ <small>Area</small><span class="req">*</span></span></div><select id="fArea"><option value="">— เลือกพื้นที่ —</option>'+areas.map(function(a){return '<option'+(a===S.area?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
+  if(S.area==='Other')h+='<input class="inp sub2" id="fAreaOther" placeholder="ระบุพื้นที่ เช่น Warehouse, Temp Office" value="'+esc(S.subArea)+'">';
+  else if(subs.length)h+='<select class="sub2" id="fSub"><option value="">— จุดย่อย (ไม่บังคับ) —</option>'+subs.map(function(a){return '<option'+(a===S.subArea?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
   h+='</div>';
-  h+='<div class="card"><div class="lbl"><span>ประเภท <span class="req">*</span><small>Observation Type</small></span></div><div class="tiles">'+types.map(function(t){var m=TYPE_META[t]||['',''];
-    return '<button type="button" class="tile'+(S.type===t?' on':'')+'" data-type="'+esc(t)+'" style="--tc:'+(m[1]||'var(--accent)')+'">'+esc(t)+'<small>'+esc(m[0])+'</small></button>';}).join('')+'</div></div>';
-  h+='<div class="card"><div class="lbl"><span>รูปที่พบ <span class="req">*</span><small>Photo · สูงสุด '+MAXP+'</small></span></div>'+photoRow('F',S.pf)+'</div>';
-  h+='<div class="card"><div class="lbl"><span>สิ่งที่พบเจอ <span class="req">*</span><small>What was found</small></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น พบคนทำงานบนที่สูงไม่คล้องเกี่ยว">'+esc(S.desc)+'</textarea></div>';
+  h+='<div class="card"><div class="lbl"><span>ประเภท <small>Observation Type</small><span class="req">*</span></span></div><div class="tiles">'+types.map(function(t){var m=TYPE_META[t]||['',''];
+    return '<button type="button" class="tile'+(S.type===t?' on':'')+'" data-type="'+esc(t)+'" style="--tc:'+(m[1]||'var(--accent)')+'">'+esc(t)+'<small>'+esc(m[0])+'</small></button>';}).join('')+'</div>';
+  if(S.type==='Other')h+='<input class="inp sub2" id="fTypeOther" placeholder="ระบุประเภท เช่น Security, Housekeeping" value="'+esc(S.typeOther||'')+'">';
+  h+='</div>';
+  h+='<div class="card"><div class="lbl"><span>รูปที่พบ <small>Photo · สูงสุด '+MAXP+'</small><span class="req">*</span></span></div>'+photoRow('F',S.pf)+'</div>';
+  h+='<div class="card"><div class="lbl"><span>สิ่งที่พบเจอ <small>What was found</small><span class="req">*</span></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น พบคนทำงานบนที่สูงไม่คล้องเกี่ยว">'+esc(S.desc)+'</textarea></div>';
   h+='<div class="card"><div class="lbl"><span>การแก้ไขที่ทำแล้ว <small>Action taken</small></span></div><textarea id="fAct" placeholder="แก้ไขหน้างานอย่างไร เช่น แจ้งหัวหน้างาน ให้คล้องเกี่ยวทันที">'+esc(S.act)+'</textarea></div>';
   h+='<div class="card"><div class="lbl"><span>รูปหลังแก้ไข <small>After · ไม่บังคับ</small></span></div>'+photoRow('A',S.pa)+'</div>';
   if(SAVED_FLASH)h='<div class="flash">✓ Saved · บันทึกแล้ว · กรอกใบต่อไปได้เลย</div>'+h;
@@ -258,12 +364,15 @@ function renderForm(){
   $('fDate').onchange=function(){S.date=this.value||BOOT.today;saveDraft();render();};
   $('fArea').onchange=function(){S.area=this.value;S.subArea='';saveDraft();render();};
   if($('fSub'))$('fSub').onchange=function(){S.subArea=this.value;saveDraft();};
+  if($('fAreaOther'))$('fAreaOther').oninput=function(){S.subArea=this.value;saveDraft();renderFoot();};
+  if($('fTypeOther'))$('fTypeOther').oninput=function(){S.typeOther=this.value;saveDraft();renderFoot();};
   $('fDesc').oninput=function(){S.desc=this.value;saveDraft();renderFoot();};
   $('fAct').oninput=function(){S.act=this.value;saveDraft();};
 }
 function photoRow(g,arr){
   var h='<div class="pho" data-g="'+g+'">';
-  arr.forEach(function(d,i){h+='<div class="th" style="background-image:url('+d+')"><b data-del="'+g+i+'">×</b></div>';});
+  var mx=metaArr(g);
+  arr.forEach(function(d,i){h+='<div class="th" style="background-image:url('+d+')">'+(mx[i]?'<span class="edtag">แก้ไขแล้ว</span>':'')+'<button type="button" class="edbtn" data-ed="'+g+'" data-i="'+i+'"><span>✎ '+(mx[i]?'แก้อีก':'Edit')+'</span></button><b data-del="'+g+i+'">×</b></div>';});
   if(arr.length<MAXP)h+='<button type="button" class="add" data-add="'+g+'">📷<br>'+(arr.length?'เพิ่มรูป':'ถ่ายรูป')+'</button>';
   return h+'</div>';
 }
@@ -281,7 +390,7 @@ function renderQueue(){
   if(SAVED_FLASH)h+='<div class="flash">✓ Saved · บันทึกแล้ว</div>';
   if(!QUEUE.length)h+='<div class="hint" style="text-align:center;padding:30px 0">ยังไม่มีรายการ</div>';
   QUEUE.slice().reverse().forEach(function(e,ri){var i=QUEUE.length-1-ri,m=TYPE_META[e.type]||['','var(--accent)'];
-    h+='<div class="qc"><div class="p" style="background-image:url('+(e.pf[0]||'')+')"></div><div><div class="h"><span class="ty" style="--tc:'+m[1]+'">'+esc(e.type)+'</span>'+esc(e.area)+(e.subArea?' · '+esc(e.subArea):'')+' · '+esc(fmtDate(e.date))+'</div><div class="x">'+esc(e.desc)+'</div></div>'+
+    h+='<div class="qc"><div class="p" style="background-image:url('+(e.pf[0]||'')+')"></div><div><div class="h"><span class="ty" style="--tc:'+m[1]+'">'+esc(e.type==='Other'&&e.typeOther?'Other · '+e.typeOther:e.type)+'</span>'+esc(e.area)+(e.subArea?' · '+esc(e.subArea):'')+' · '+esc(fmtDate(e.date))+'</div><div class="x">'+esc(e.desc)+'</div></div>'+
       '<div class="ac"><span data-edit="'+i+'">✎ Edit</span><span class="rm" data-rm="'+i+'">Remove</span></div></div>';});
   $('scr').innerHTML=h;renderFoot();
 }
@@ -289,9 +398,10 @@ function renderQueue(){
 /* ---------------- events ---------------- */
 var PICK='F';
 document.addEventListener('click',function(e){
-  var t=e.target.closest('[data-type]');if(t){S.type=t.getAttribute('data-type');saveDraft();render();return;}
+  var t=e.target.closest('[data-type]');if(t){S.type=t.getAttribute('data-type');if(S.type!=='Other')S.typeOther='';saveDraft();render();return;}
   var a=e.target.closest('[data-add]');if(a){PICK=a.getAttribute('data-add');$('picker').value='';$('picker').click();return;}
-  var d=e.target.closest('[data-del]');if(d){var k=d.getAttribute('data-del');(k[0]==='F'?S.pf:S.pa).splice(+k.slice(1),1);saveDraft();render();return;}
+  var ed0=e.target.closest('[data-ed]');if(ed0){PE.open(ed0.getAttribute('data-ed'),+ed0.getAttribute('data-i'));return;}
+  var d=e.target.closest('[data-del]');if(d){var k=d.getAttribute('data-del'),ix=+k.slice(1);(k[0]==='F'?S.pf:S.pa).splice(ix,1);metaArr(k[0]).splice(ix,1);saveDraft();render();return;}
   var ed=e.target.closest('[data-edit]');if(ed){var i=+ed.getAttribute('data-edit');S=Object.assign(blank(),QUEUE[i]);QUEUE.splice(i,1);saveQueue();saveDraft();VIEW='form';SAVED_FLASH=false;render();return;}
   var rm=e.target.closest('[data-rm]');if(rm){QUEUE.splice(+rm.getAttribute('data-rm'),1);saveQueue();render();return;}
   if(e.target.closest('#rbar')){VIEW='queue';SAVED_FLASH=false;render();}
@@ -315,13 +425,13 @@ function shrink(file){
 /* ---------------- save / send ---------------- */
 function saveEntry(){
   if(missing().length)return;
-  var e=Object.assign({},S,{ref:uid(),desc:S.desc.trim(),act:S.act.trim()});
+  var e=Object.assign({},S,{ref:uid(),desc:S.desc.trim(),act:S.act.trim(),typeOther:(S.typeOther||'').trim(),subArea:(S.subArea||'').trim()});
   QUEUE.push(e);saveQueue();
   var keep={date:S.date,area:S.area,subArea:S.subArea};
   S=Object.assign(blank(),keep);saveDraft();idbPut('draft',S);
   VIEW='queue';SAVED_FLASH=true;render();
 }
-function payloadOf(e){return {clientRef:e.ref,reportDate:e.date,area:e.area,subArea:e.subArea||'',type:e.type,desc:e.desc,action:e.act||'',photos:e.pf.slice(),after:e.pa.slice()};}
+function payloadOf(e){return {clientRef:e.ref,reportDate:e.date,area:e.area,subArea:(e.subArea||'').trim(),type:e.type,typeOther:(e.typeOther||'').trim(),desc:e.desc,action:e.act||'',photos:e.pf.slice(),after:e.pa.slice()};}
 function overlay(on,t,s){$('overlay').classList.toggle('show',!!on);if(t)$('ovtxt').textContent=t;$('ovsub').textContent=s||'';}
 function sendAll(){
   if(SENDING||!QUEUE.length)return;SENDING=true;renderFoot();
@@ -340,6 +450,167 @@ function sendAll(){
   };
   step();
 }
+
+/* ---------------- photo editor (ported from PCC LINE form r5 · D1 toolbar on top · E1 re-edit) ----------------
+   Non-destructive: S.pfx / S.pax hold {orig, base|null, shapes} parallel to S.pf / S.pa.
+   S.pf / S.pa always hold the flattened JPEG → the send payload is unchanged. */
+function metaArr(g){var k=g==='F'?'pfx':'pax',a=g==='F'?S.pf:S.pa;if(!Array.isArray(S[k]))S[k]=[];while(S[k].length<a.length)S[k].push(null);if(S[k].length>a.length)S[k].length=a.length;return S[k];}
+var PE=(function(){
+  var E={drawMode:true,g:'F',i:-1,base:null,orig:null,shapes:[],hist:[],fut:[],tool:'box',color:'#ef5350',size:1,drag:null,crop:null};
+  var cv=$('pecv'),ctx=cv.getContext('2d');
+  var SIZES=[0.6,1,1.6];
+  var COLS=['#ef5350','#f4b728','#2ecc8f','#ffffff'];
+  var TOOLS=[['box','กรอบ'],['circle','วงกลม'],['arrow','ลูกศร'],['pen','ขีดเขียน'],['crop','ครอป'],['rotate','หมุน']];
+  var SVG={
+   box:'<rect x="4" y="6" width="16" height="12" rx="1.5"/>',circle:'<circle cx="12" cy="12" r="8"/>',arrow:'<path d="M6 18L18 6M9 6h9v9"/>',
+   pen:'<path d="M15.5 4.5l4 4L9 19H5v-4z"/><path d="M13.5 6.5l4 4"/>',crop:'<path d="M7 3v14h14"/><path d="M3 7h14v14"/>',
+   rotate:'<path d="M20 11a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>',undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+   redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+   draw:'<path d="M4 20h16"/><path d="M14.5 4.5l3 3L9 16H6v-3z"/>',
+   erase:'<path d="M7 21l-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="M5 11l9 9"/>'};
+  function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+SVG[n]+'</svg>';}
+  function lwFor(sz){return Math.max(E.base.width,E.base.height)*0.007*SIZES[sz];}
+  function cloneCanvas(c){var n=document.createElement('canvas');n.width=c.width;n.height=c.height;n.getContext('2d').drawImage(c,0,0);return n;}
+  function copyShapes(a){return (a||[]).map(function(s){var n=Object.assign({},s);if(s.pts)n.pts=s.pts.map(function(p){return p.slice();});return n;});}
+  function snap(){E.fut=[];E.hist.push({base:E.base,shapes:copyShapes(E.shapes)});if(E.hist.length>40)E.hist.shift();}
+  function toast(t,ms){var x=$('petoast');x.textContent=t;x.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){x.classList.remove('on');},ms||1600);}
+  function loadCanvas(src){return new Promise(function(res){if(!src)return res(null);var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);res(c);};im.onerror=function(){res(null);};im.src=src;});}
+  function canReset(){return !!E.base&&(E.shapes.length>0||E.base!==E.orig);}
+  function open(g,i){
+    var arr=g==='F'?S.pf:S.pa,meta=metaArr(g)[i]||null;
+    var origSrc=meta&&meta.orig||arr[i];
+    Promise.all([loadCanvas(origSrc),loadCanvas(meta&&meta.base)]).then(function(c){
+      if(!c[0]){overlay(true,'เปิดรูปไม่ได้');setTimeout(function(){overlay(false);},1400);return;}
+      E.g=g;E.i=i;E.orig=c[0];E.base=c[1]||c[0];E.shapes=copyShapes(meta&&meta.shapes);E.fut=[];E.crop=null;E.tool='box';E.drag=null;
+      E.hist=[];for(var k=0;k<E.shapes.length;k++)E.hist.push({base:E.base,shapes:copyShapes(E.shapes.slice(0,k))});
+      $('pe').classList.add('on');document.body.style.overflow='hidden';bar();fit();draw();
+    });
+  }
+  function close(){$('pe').classList.remove('on');document.body.style.overflow='';$('pecrop').classList.remove('on');E.base=E.orig=null;}
+  function fit(){resetZ();var st=$('pestage'),W=st.clientWidth-16,H=st.clientHeight-16,b=E.base,k=Math.min(W/b.width,H/b.height);
+    cv.width=b.width;cv.height=b.height;cv.style.width=Math.round(b.width*k)+'px';cv.style.height=Math.round(b.height*k)+'px';}
+  window.addEventListener('resize',function(){if(E.base&&$('pe').classList.contains('on')){fit();draw();}});
+  function paint(g,s){
+    var w=s.w;g.lineCap='round';g.lineJoin='round';
+    var pass=function(col,width){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=width;
+      if(s.t==='box'){g.strokeRect(Math.min(s.x1,s.x2),Math.min(s.y1,s.y2),Math.abs(s.x2-s.x1),Math.abs(s.y2-s.y1));}
+      else if(s.t==='circle'){g.beginPath();g.ellipse((s.x1+s.x2)/2,(s.y1+s.y2)/2,Math.abs(s.x2-s.x1)/2,Math.abs(s.y2-s.y1)/2,0,0,Math.PI*2);g.stroke();}
+      else if(s.t==='arrow'){var a=Math.atan2(s.y2-s.y1,s.x2-s.x1),hl=w*4.2;
+        g.beginPath();g.moveTo(s.x1,s.y1);g.lineTo(s.x2-Math.cos(a)*hl*0.6,s.y2-Math.sin(a)*hl*0.6);g.stroke();
+        g.beginPath();g.moveTo(s.x2,s.y2);g.lineTo(s.x2-hl*Math.cos(a-0.45),s.y2-hl*Math.sin(a-0.45));g.lineTo(s.x2-hl*Math.cos(a+0.45),s.y2-hl*Math.sin(a+0.45));g.closePath();g.fill();g.stroke();}
+      else if(s.t==='pen'){g.beginPath();s.pts.forEach(function(p,i){i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);});g.stroke();}
+    };
+    pass('rgba(0,0,0,.55)',w*1.7);pass(s.c,w);
+  }
+  function norm(r){return {x:Math.min(r.x1,r.x2),y:Math.min(r.y1,r.y2),w:Math.abs(r.x2-r.x1),h:Math.abs(r.y2-r.y1)};}
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(E.base,0,0);
+    E.shapes.forEach(function(s){paint(ctx,s);});
+    if(E.drag&&E.drag.s)paint(ctx,E.drag.s);
+    if(E.crop){var c=norm(E.crop);ctx.fillStyle='rgba(0,0,0,.55)';
+      ctx.fillRect(0,0,cv.width,c.y);ctx.fillRect(0,c.y+c.h,cv.width,cv.height-c.y-c.h);ctx.fillRect(0,c.y,c.x,c.h);ctx.fillRect(c.x+c.w,c.y,cv.width-c.x-c.w,c.h);
+      ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,cv.width/300);ctx.setLineDash([cv.width/60,cv.width/90]);ctx.strokeRect(c.x,c.y,c.w,c.h);ctx.setLineDash([]);}
+  }
+  function pt(e){var r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height];}
+  var Z={s:1,x:0,y:0},PTR={},PINCH=null,HOLD=false,PAN=null,stage=$('pestage');
+  function applyZ(){if(Z.s<=1.01){Z.s=1;Z.x=0;Z.y=0;}
+    var mx=(Z.s-1)*cv.clientWidth/2+40,my=(Z.s-1)*cv.clientHeight/2+40;Z.x=Math.max(-mx,Math.min(mx,Z.x));Z.y=Math.max(-my,Math.min(my,Z.y));
+    cv.style.transform=Z.s===1?'':'translate('+Z.x+'px,'+Z.y+'px) scale('+Z.s+')';$('pefit').classList.toggle('on',Z.s>1);
+    var zm=Z.s>1;if(zm!==applyZ.was){applyZ.was=zm;E.drawMode=!zm;if(E.base)bar();}}
+  function resetZ(){Z={s:1,x:0,y:0};PINCH=null;applyZ();}
+  function two(){var k=Object.keys(PTR);return [PTR[k[0]],PTR[k[1]]];}
+  function startPinch(){var p=two(),r=cv.getBoundingClientRect();
+    PINCH={d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1,mx:(p[0].x+p[1].x)/2,my:(p[0].y+p[1].y)/2,s:Z.s,x:Z.x,y:Z.y,
+      cx:r.left+r.width/2-Z.x,cy:r.top+r.height/2-Z.y};}
+  stage.addEventListener('pointerdown',function(e){
+    if(e.target.closest('button'))return;
+    e.preventDefault();try{stage.setPointerCapture(e.pointerId);}catch(x){}
+    PTR[e.pointerId]={x:e.clientX,y:e.clientY};
+    var n=Object.keys(PTR).length;
+    if(n>=2){if(E.drag){if(E.drag.crop)E.crop=null;E.drag=null;draw();}PAN=null;HOLD=true;if(n===2)startPinch();return;}
+    if(HOLD)return;
+    if(locked()){PAN={x:e.clientX,y:e.clientY,zx:Z.x,zy:Z.y};return;}
+    var p=pt(e);
+    if(E.tool==='crop'){E.crop={x1:p[0],y1:p[1],x2:p[0],y2:p[1]};E.drag={crop:1};$('pecrop').classList.remove('on');draw();return;}
+    var s={t:E.tool,c:E.color,w:lwFor(E.size),x1:p[0],y1:p[1],x2:p[0],y2:p[1]};if(E.tool==='pen')s.pts=[p];
+    E.drag={s:s};
+  });
+  stage.addEventListener('pointermove',function(e){
+    if(PTR[e.pointerId]){PTR[e.pointerId].x=e.clientX;PTR[e.pointerId].y=e.clientY;}
+    if(PINCH&&Object.keys(PTR).length>=2){var p=two(),d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),mx=(p[0].x+p[1].x)/2,my=(p[0].y+p[1].y)/2;
+      var ns=Math.max(1,Math.min(6,PINCH.s*d/PINCH.d));
+      var qx=(PINCH.mx-PINCH.cx-PINCH.x)/PINCH.s,qy=(PINCH.my-PINCH.cy-PINCH.y)/PINCH.s;
+      Z.s=ns;Z.x=mx-PINCH.cx-ns*qx;Z.y=my-PINCH.cy-ns*qy;applyZ();return;}
+    if(PAN&&!HOLD){Z.x=PAN.zx+e.clientX-PAN.x;Z.y=PAN.zy+e.clientY-PAN.y;applyZ();return;}
+    if(!E.drag||HOLD)return;var q=pt(e);
+    if(E.drag.crop){E.crop.x2=Math.max(0,Math.min(cv.width,q[0]));E.crop.y2=Math.max(0,Math.min(cv.height,q[1]));draw();return;}
+    var s=E.drag.s;s.x2=q[0];s.y2=q[1];if(s.t==='pen')s.pts.push(q);draw();
+  });
+  function endDrag(){
+    if(!E.drag)return;
+    if(E.drag.crop){E.drag=null;var c=norm(E.crop);if(c.w<cv.width*0.05||c.h<cv.height*0.05){E.crop=null;draw();return;}$('pecrop').classList.add('on');draw();return;}
+    var s=E.drag.s;E.drag=null;
+    var big=s.t==='pen'?s.pts.length>2:(Math.abs(s.x2-s.x1)+Math.abs(s.y2-s.y1))>s.w*3;
+    if(big){snap();E.shapes.push(s);bar();}
+    draw();
+  }
+  function ptrUp(e){delete PTR[e.pointerId];var n=Object.keys(PTR).length;if(n===0)PAN=null;
+    if(n<2)PINCH=null;if(n===0){if(HOLD){HOLD=false;return;}endDrag();}}
+  stage.addEventListener('pointerup',ptrUp);stage.addEventListener('pointercancel',ptrUp);
+  stage.addEventListener('wheel',function(e){e.preventDefault();var r=cv.getBoundingClientRect(),cx=r.left+r.width/2-Z.x,cy=r.top+r.height/2-Z.y,
+    qx=(e.clientX-cx-Z.x)/Z.s,qy=(e.clientY-cy-Z.y)/Z.s,ns=Math.max(1,Math.min(6,Z.s*(e.deltaY<0?1.15:1/1.15)));
+    Z.s=ns;Z.x=e.clientX-cx-ns*qx;Z.y=e.clientY-cy-ns*qy;applyZ();},{passive:false});
+  $('pefit').onclick=function(e){e.stopPropagation();resetZ();};
+  function bake(){var c=cloneCanvas(E.base),g=c.getContext('2d');E.shapes.forEach(function(s){paint(g,s);});return c;}
+  $('pecropOk').onclick=function(){var r=norm(E.crop);snap();var b=bake(),c=document.createElement('canvas');c.width=Math.round(r.w);c.height=Math.round(r.h);
+    c.getContext('2d').drawImage(b,r.x,r.y,r.w,r.h,0,0,c.width,c.height);E.base=c;E.shapes=[];E.crop=null;$('pecrop').classList.remove('on');E.tool='box';fit();draw();bar();};
+  $('pecropNo').onclick=function(){E.crop=null;$('pecrop').classList.remove('on');draw();};
+  function rotate(){snap();var b=bake(),c=document.createElement('canvas');c.width=b.height;c.height=b.width;var g=c.getContext('2d');
+    g.translate(c.width,0);g.rotate(Math.PI/2);g.drawImage(b,0,0);E.base=c;E.shapes=[];fit();draw();bar();}
+  function zoomed(){return Z.s>1;}
+  function locked(){return zoomed()&&!E.drawMode;}
+  function bar(){
+    $('pebar').innerHTML='<div class="pe-hdr"><div class="l"><button type="button" class="pe-cancel" data-pa="cancel">Cancel</button></div><div class="pe-ur">'+
+      '<button type="button" data-pa="draw" class="pe-draw'+(zoomed()&&E.drawMode?' on':'')+'"'+(zoomed()?'':' disabled')+' aria-label="Draw mode">'+ic('draw')+'</button><span class="pe-dv"></span>'+
+      '<button type="button" data-pa="undo"'+(E.hist.length?'':' disabled')+' aria-label="Undo">'+ic('undo')+'</button>'+
+      '<button type="button" data-pa="redo"'+(E.fut.length?'':' disabled')+' aria-label="Redo">'+ic('redo')+'</button>'+
+      '<span class="pe-dv"></span><button type="button" data-pa="reset"'+(canReset()?'':' disabled')+' aria-label="ล้างทั้งหมด">'+ic('erase')+'</button></div>'+
+      '<div class="r"><button type="button" class="pe-done" data-pa="done">Done</button></div></div>'+
+      '<div class="pe-tools'+(locked()?' locked':'')+'">'+TOOLS.map(function(t){return '<button type="button" class="pe-tl'+(E.tool===t[0]?' on':'')+'" data-pt="'+t[0]+'">'+ic(t[0])+t[1]+'</button>';}).join('')+'</div>'+
+      '<div class="pe-style'+(locked()?' locked':'')+'"><div class="pe-cols">'+COLS.map(function(c){return '<button type="button" class="pe-sw'+(E.color===c?' on':'')+'" data-pc="'+c+'" style="background:'+c+'"></button>';}).join('')+
+      '</div><div class="pe-seg">'+[2,4,7].map(function(h,i){return '<button type="button" data-psz="'+i+'"'+(E.size===i?' class="on"':'')+'><i style="height:'+h+'px"></i></button>';}).join('')+'</div></div>';
+  }
+  function setTool(t){
+    if((t==='rotate'||t==='crop')&&E.shapes.length)toast('⚠ กรอบที่วาดไว้จะรวมเข้ากับรูป (ลบได้ด้วย ↶ เท่านั้น)',2400);
+    if(t==='rotate'){rotate();return;}
+    E.tool=t;E.crop=null;$('pecrop').classList.remove('on');bar();draw();
+  }
+  function done(){
+    var arr=E.g==='F'?S.pf:S.pa,meta=metaArr(E.g),dirtyBase=E.base!==E.orig,any=E.shapes.length>0||dirtyBase,cur=meta[E.i]||null;
+    if(!any){arr[E.i]=cur&&cur.orig||arr[E.i];meta[E.i]=null;}
+    else{meta[E.i]={orig:cur&&cur.orig||arr[E.i],base:dirtyBase?E.base.toDataURL('image/jpeg',0.9):null,shapes:copyShapes(E.shapes)};
+      arr[E.i]=bake().toDataURL('image/jpeg',JPEGQ);}
+    close();saveDraft();render();
+  }
+  $('pe').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;e.stopPropagation();
+    if(b.closest('#pecrop'))return;
+    if((b.dataset.pt||b.dataset.pc||b.dataset.psz)&&locked()){toast('Press ✏');return;}
+    if(b.dataset.pa==='draw'){if(!zoomed())return;E.drawMode=!E.drawMode;bar();return;}
+    if(b.dataset.pt){setTool(b.dataset.pt);return;}
+    if(b.dataset.pc){E.color=b.dataset.pc;bar();return;}
+    if(b.dataset.psz){E.size=+b.dataset.psz;bar();return;}
+    var a=b.dataset.pa,sz=E.base&&E.base.width+'x'+E.base.height;
+    if(a==='undo'||a==='redo'){var from=a==='undo'?E.hist:E.fut,to=a==='undo'?E.fut:E.hist,h=from.pop();if(!h)return;
+      to.push({base:E.base,shapes:copyShapes(E.shapes)});E.base=h.base;E.shapes=copyShapes(h.shapes);E.crop=null;$('pecrop').classList.remove('on');
+      if(sz!==E.base.width+'x'+E.base.height)fit();draw();bar();return;}
+    if(a==='reset'){if(!canReset())return;snap();E.base=E.orig;E.shapes=[];E.crop=null;$('pecrop').classList.remove('on');fit();draw();bar();return;}
+    if(a==='cancel'){close();return;}
+    if(a==='done'){done();return;}
+  });
+  return {open:open};
+})();
+
 start();
 </script>
 </body>
