@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>SHOC · GMTP Contractor</title>
+<!-- 11 Oct 2026 · Contractor SHOC LIFF form (shoc/ v0.1). Public page: NO secrets.
+     Identity = LIFF ID token, verified server-side (SHOC Data Service / Shoc.js).
+     Decisions: theme G2 Mint+Teal · F1 field order · Save → Ready to send → Send All · 6 observation classes ·
+     first open through a company link ?c=<InviteCode> → type real name once (B2) · confirmation in-form only (S1). -->
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{
+  --bg:#F1F7F5; --bg2:#E6F0ED; --card:#FFFFFF; --border:#D3E5DF; --border2:#BFD6CE;
+  --text:#0F2A26; --text2:#4E6560; --muted:#6F8782; --track:#EAF2EF;
+  --accent:#0A7D6E; --accent-bg:#DDEDE8; --accent-text:#075A4F; --accent-ink:#FFFFFF;
+  --ok:#0A7D6E; --warn:#B26A00; --warn-bg:#FBF0DA; --crit:#C0362C; --crit-bg:#FCEBEB; --blue:#2F7DD1; --blue-bg:#E3EEFA;
+  --shadow:0 1px 2px rgba(10,40,35,.06),0 4px 14px rgba(10,40,35,.05); --r:12px; --rc:10px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0E1614; --bg2:#121C19; --card:#172220; --border:#24332F; --border2:#33453F;
+  --text:#E6F0ED; --text2:#9DB3AC; --muted:#6F857F; --track:#1B2825;
+  --accent:#3FBFA9; --accent-bg:#133630; --accent-text:#9FE3D5; --accent-ink:#06201B;
+  --warn:#F0B429; --warn-bg:#33290F; --crit:#E8574A; --crit-bg:#361A17; --blue:#7FB3F0; --blue-bg:#15283D;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 22px rgba(0,0,0,.3);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;display:flex;flex-direction:column;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Thai",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.appbar{flex:none;background:var(--accent);color:var(--accent-ink);padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top))}
+.appbar .t{font-weight:700;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.appbar .t small{font-weight:500;font-size:11px;opacity:.85}
+.appbar .who{font-size:12.5px;opacity:.92;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 7px;border-radius:99px;background:rgba(255,255,255,.22)}
+.tag.unv{background:var(--warn);color:#fff}
+.rbar{flex:none;background:var(--accent-bg);color:var(--accent-text);font-weight:600;font-size:13.5px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);cursor:pointer}
+#scr{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.lbl{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:14px;margin:0 0 6px}
+.lbl small{font-weight:400;color:var(--muted);font-size:11.5px}
+.lbl .req{color:var(--crit);font-weight:700;margin-left:3px}
+.inp,select,textarea{width:100%;border:1px solid var(--border2);background:var(--card);color:var(--text);border-radius:var(--rc);padding:11px 12px;font:inherit;font-size:16px}
+textarea{min-height:76px;resize:vertical}
+select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+.datebox{position:relative}
+.datebox .show{pointer-events:none}
+.datebox input[type=date]{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tile{border:1.5px solid var(--border2);background:var(--card);color:var(--text);border-radius:var(--rc);padding:10px 8px;font:inherit;font-size:13.5px;font-weight:600;text-align:left;line-height:1.25;min-height:54px}
+.tile small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:1px}
+.tile.on{border-color:var(--tc,var(--accent));background:color-mix(in srgb,var(--tc,var(--accent)) 13%,var(--card));color:var(--tc,var(--accent))}
+.tile.on small{color:inherit;opacity:.85}
+.pho{display:flex;gap:8px;flex-wrap:wrap}
+.pho .th{width:76px;height:76px;border-radius:10px;background-size:cover;background-position:center;position:relative;border:1px solid var(--border)}
+.pho .th b{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--crit);color:#fff;font-size:13px;line-height:22px;text-align:center;border:2px solid var(--card)}
+.pho .add{width:76px;height:76px;border-radius:10px;border:1.5px dashed var(--accent);background:var(--accent-bg);color:var(--accent-text);font:inherit;font-size:12px;font-weight:600;line-height:1.2}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.foot{flex:none;background:var(--card);border-top:1px solid var(--border);padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
+.btn{flex:1;border:0;border-radius:12px;padding:14px 10px;font:inherit;font-size:16px;font-weight:700;background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.miss{font-size:12px;color:var(--warn);flex:1.4;line-height:1.3}
+.miss b{display:block;color:var(--text2);font-weight:600}
+.screen{padding:28px 20px;text-align:center;max-width:460px;margin:0 auto}
+.screen .big{font-size:52px;line-height:1;margin:14px 0}
+.screen h2{margin:8px 0 6px;font-size:21px}
+.screen p{color:var(--text2);margin:6px 0}
+.err{background:var(--crit-bg);color:var(--crit);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:10px 0;text-align:left}
+.note{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:10px 0;text-align:left}
+.av{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);background:var(--bg2);margin:0 auto}
+.cobox{background:var(--bg2);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;margin:14px 0 8px;font-size:14px}
+.cobox b{font-size:16px}
+.qc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:9px;display:grid;grid-template-columns:62px 1fr;gap:10px;box-shadow:var(--shadow)}
+.qc .p{width:62px;height:62px;border-radius:8px;background:var(--track) center/cover}
+.qc .h{font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.qc .ty{font-size:10.5px;font-weight:700;color:#fff;padding:1px 7px;border-radius:99px;background:var(--tc)}
+.qc .x{font-size:13px;color:var(--text2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.qc .ac{grid-column:1/-1;display:flex;gap:16px;font-size:13px;font-weight:600;color:var(--accent);border-top:1px solid var(--border);padding-top:7px}
+.qc .ac .rm{color:var(--crit);margin-left:auto}
+.flash{background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:9px 12px;font-weight:600;margin-bottom:10px;text-align:center}
+.boot{padding:40px 20px;text-align:center;color:var(--text2)}
+.boot .sp{width:34px;height:34px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#overlay{position:fixed;inset:0;background:rgba(8,20,18,.55);display:none;align-items:center;justify-content:center;z-index:50;color:#fff;text-align:center;flex-direction:column}
+#overlay.show{display:flex}
+#overlay .sp{width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite;margin-bottom:12px}
+.done .n{font-size:46px;font-weight:800;color:var(--accent);line-height:1.1}
+.done .ck{width:76px;height:76px;border-radius:50%;background:var(--accent);color:#fff;font-size:40px;line-height:76px;margin:0 auto 12px}
+</style>
+</head>
+<body>
+<div class="appbar" id="appbar" hidden>
+  <div class="t"><span>ส่ง SHOC</span><small id="ver"></small></div>
+  <div class="who" id="who"></div>
+</div>
+<div class="rbar" id="rbar" hidden><span>Ready to send (<span id="rn">0</span>)</span><span>View ›</span></div>
+<div id="scr"><div class="boot" id="bootbox"><div class="sp"></div><div id="bootmsg">กำลังเข้าสู่ระบบด้วย LINE…</div><div style="font-size:11px;margin-top:6px" id="boott"></div></div></div>
+<div class="foot" id="foot" hidden></div>
+<input type="file" id="picker" accept="image/*" multiple hidden>
+<div id="overlay"><div class="sp"></div><div id="ovtxt" style="font-weight:700"></div><div id="ovsub" style="font-size:13px;opacity:.85;margin-top:4px"></div></div>
+<script>
+/* ---------------- config (none of these are secrets) ---------------- */
+var LIFF_ID = 'PASTE_LIFF_ID';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
+var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
+var PAGE_VER = 'shoc-page v0.1';
+var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
+var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
+  'Near Miss':['เหตุการณ์เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','#2E8F62'],
+  'Good Practice':['การปฏิบัติที่ดี','var(--blue)'],'Other':['อื่นๆ','var(--muted)']};
+var LS_BOOTC='shoc_boot_cache_v1', LS_DRAFT='shoc_draft_v1';
+
+var BOOT=null, TOKEN='', S=null, QUEUE=[], VIEW='form', SENDING=false, SAVED_FLASH=false, LAST_SENT=null, INVITE='';
+
+/* ---------------- helpers ---------------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(iso){if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||''))return '';var p=iso.split('-');return ('0'+p[2]).slice(-2)+' '+MON[+p[1]-1]+' '+p[0];}
+function todayBKK(){return new Date(Date.now()+7*3600e3).toISOString().slice(0,10);}
+function uid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function blank(){return {date:(BOOT&&BOOT.today)||todayBKK(),area:'',subArea:'',type:'',desc:'',act:'',pf:[],pa:[]};}
+function inviteCode(){
+  var m=/[?&]c=([^&#]+)/.exec(location.search||'');if(m)return decodeURIComponent(m[1]);
+  try{var st=/[?&]liff\.state=([^&#]+)/.exec(location.search||'');if(st){var q=decodeURIComponent(st[1]);var m2=/[?&]?c=([^&#]+)/.exec(q);if(m2)return decodeURIComponent(m2[1]);}}catch(e){}
+  return lsGet('shoc_invite','')||'';
+}
+
+var _tokOk,TOKEN_P=new Promise(function(r){_tokOk=r;});
+function api(action, extra){return TOKEN_P.then(function(){
+  var body=Object.assign({liff:1,action:action,idToken:TOKEN},extra||{});
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),redirect:'follow'}).then(function(r){return r.json();});
+});}
+
+/* ---------------- start (stale-while-revalidate boot, PCC r3 pattern) ---------------- */
+var T0=Date.now(),FAST=false;
+function bootStep(m){var e=$('bootmsg');if(e)e.textContent=m;}
+var _bt=setInterval(function(){var t=$('boott');if(!t||BOOT){clearInterval(_bt);return;}t.textContent=((Date.now()-T0)/1000).toFixed(1)+' s';},200);
+function start(){
+  INVITE=inviteCode();if(INVITE)lsSet('shoc_invite',INVITE);
+  if(LIFF_ID==='PASTE_LIFF_ID'){screenError('หน้านี้ยังไม่ได้ตั้งค่า LIFF_ID','PCC SHE จะตั้งค่าให้ก่อนเปิดใช้');return;}
+  var c=lsGet(LS_BOOTC,null);
+  if(c&&c.boot&&c.at&&(Date.now()-c.at)<14*864e5){FAST=c.sub||true;showForm(Object.assign({},c.boot,{today:todayBKK()}));}
+  liff.init({liffId:LIFF_ID}).then(function(){
+    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
+    TOKEN=liff.getIDToken()||'';_tokOk();
+    var sub='';try{sub=(liff.getDecodedIDToken()||{}).sub||'';}catch(e){}
+    if(FAST&&FAST!==true&&sub&&FAST!==sub){FAST=false;lsSet(LS_BOOTC,null);location.reload();return;}
+    bootStep('กำลังโหลดฟอร์ม…');
+    return api('boot',{c:INVITE}).then(function(r){
+      if(r&&r.ok&&r.status==='ok')lsSet(LS_BOOTC,{sub:sub,at:Date.now(),boot:r.boot});else if(r&&r.ok)lsSet(LS_BOOTC,null);
+      if(FAST){if(r&&r.ok&&r.status==='ok'){BOOT=Object.assign(r.boot,{today:r.boot.today||todayBKK()});renderWho();return;}if(!r||!r.ok)return;}
+      onBoot(r);
+    });
+  }).catch(function(e){if(FAST){_tokOk();return;}screenError('เปิดฟอร์มไม่สำเร็จ',String(e&&e.message||e));});
+}
+function onBoot(r){
+  if(!r||!r.ok){screenError('เปิดฟอร์มไม่สำเร็จ',(r&&r.error)||'no response');return;}
+  if(r.status==='register'){screenRegister(r);return;}
+  if(r.status==='nolink'){screenError('ยังไม่ได้ลงทะเบียน','กรุณาเปิดจากลิงก์ของบริษัทที่ได้รับจาก PCC SHE (ลิงก์มีรหัสบริษัทต่อท้าย)');return;}
+  if(r.status==='blocked'){screenError('บัญชี LINE นี้ถูกระงับการใช้ฟอร์ม','ติดต่อ PCC SHE');return;}
+  showForm(r.boot);
+}
+function showForm(boot){
+  BOOT=boot;
+  idbOpen().then(function(){return Promise.all([idbGet('queue'),idbGet('draft')]);}).then(function(v){
+    QUEUE=Array.isArray(v[0])?v[0]:[];
+    var d=lsGet(LS_DRAFT,null);
+    S=v[1]?Object.assign(blank(),v[1]):(d?Object.assign(blank(),d):blank());
+    if(!S.date)S.date=BOOT.today;
+    $('appbar').hidden=false;$('foot').hidden=false;$('ver').textContent=PAGE_VER;
+    renderWho();render();
+  });
+}
+
+/* ---------------- screens ---------------- */
+function bare(html){$('appbar').hidden=true;$('foot').hidden=true;$('rbar').hidden=true;$('scr').innerHTML='<div class="screen">'+html+'</div>';}
+function screenError(t,msg){bare('<div class="big">⚠️</div><h2>'+esc(t)+'</h2><div class="err">'+esc(msg)+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button>');}
+function screenRegister(r,err){
+  bare('<img class="av" src="'+esc(r.picture||'')+'" alt="" onerror="this.style.visibility=\'hidden\'">'+
+    '<h2 style="margin-top:12px">'+esc(r.lineName||'')+'</h2><p style="font-size:12.5px">ชื่อและรูปจาก LINE ของคุณ</p>'+
+    '<div class="cobox"><span>บริษัท <small style="color:var(--muted)">(จากลิงก์)</small></span><b>'+esc(r.companyName||r.company)+'</b></div>'+
+    '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ครั้งเดียว · ไทยหรืออังกฤษ</small></span></div>'+
+    '<input class="inp" id="rn_name" placeholder="เช่น บุญมี สารบคง / Boonmee Sarbkong" autocomplete="name">'+
+    (err?'<div class="err">'+esc(err)+'</div>':'')+
+    '<p style="font-size:12.5px;margin-top:10px">ครั้งต่อไปไม่ต้องทำขั้นตอนนี้อีก</p>'+
+    '<button class="btn" id="rn_go" style="width:100%">เริ่มใช้งาน</button>');
+  $('rn_go').onclick=function(){
+    var n=($('rn_name').value||'').trim();if(n.length<3){screenRegister(r,'กรุณาพิมพ์ชื่อ-นามสกุลจริง');return;}
+    this.disabled=true;this.textContent='กำลังลงทะเบียน…';
+    api('register',{c:INVITE,name:n}).then(function(x){
+      if(!x||!x.ok){screenRegister(r,(x&&x.error)||'no response');return;}
+      lsSet(LS_BOOTC,null);showForm(x.boot);
+    }).catch(function(){screenRegister(r,'เน็ตหลุด ลองใหม่อีกครั้ง');});
+  };
+}
+function screenSent(sent,err){
+  var c=(sent[sent.length-1]&&sent[sent.length-1].counts)||(BOOT&&BOOT.counts)||{today:0,month:0};
+  bare('<div class="done"><div class="ck">✓</div><h2>ส่งแล้ว '+sent.length+' ใบ ขอบคุณค่ะ</h2><p style="font-size:12.5px">'+esc(sent.map(function(s){return s.id;}).join(' · '))+'</p>'+
+    (err?'<div class="note">'+esc(err)+'</div>':'')+
+    '<div style="margin-top:22px;color:var(--text2);font-size:13px">วันนี้คุณส่งแล้ว</div><div class="n">'+c.today+'</div><div style="color:var(--text2);font-size:13px">เดือนนี้ <b>'+c.month+'</b> ใบ</div></div>'+
+    '<button class="btn" style="width:100%;margin-top:26px" onclick="VIEW=\'form\';SAVED_FLASH=false;$(\'appbar\').hidden=false;$(\'foot\').hidden=false;render();">+ ส่งอีกใบ</button>'+
+    (window.liff&&liff.isInClient&&liff.isInClient()?'<button class="btn ghost" style="width:100%;margin-top:10px" onclick="liff.closeWindow()">ปิด</button>':''));
+  if(BOOT)BOOT.counts=c;
+}
+
+/* ---------------- IndexedDB (queue + draft with photos) ---------------- */
+var IDB=null;
+function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open('shoc_v1',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('kv');};r.onsuccess=function(){IDB=r.result;res();};r.onerror=function(){res();};}catch(e){res();}});}
+function idbGet(k){return new Promise(function(res){if(!IDB)return res(null);try{var q=IDB.transaction('kv').objectStore('kv').get(k);q.onsuccess=function(){res(q.result||null);};q.onerror=function(){res(null);};}catch(e){res(null);}});}
+function idbPut(k,v){if(!IDB)return;try{IDB.transaction('kv','readwrite').objectStore('kv').put(v,k);}catch(e){}}
+var _dT=null;
+function saveDraft(){lsSet(LS_DRAFT,Object.assign({},S,{pf:[],pa:[]}));clearTimeout(_dT);_dT=setTimeout(function(){idbPut('draft',S);},400);}
+function saveQueue(){idbPut('queue',QUEUE);}
+
+/* ---------------- validation ---------------- */
+function subAreasFor(a){return (BOOT&&BOOT.subAreas&&BOOT.subAreas[a])||[];}
+function missing(){
+  var m=[];
+  if(!S.area)m.push('พื้นที่');
+  if(!S.type)m.push('ประเภท');
+  if(!S.pf.length)m.push('รูป');
+  if(S.desc.trim().length<3)m.push('สิ่งที่พบเจอ');
+  return m;
+}
+
+/* ---------------- render ---------------- */
+function renderWho(){
+  if(!BOOT)return;
+  var me=BOOT.me||{};
+  $('who').innerHTML='👷 '+esc(me.name||me.lineName||'')+' <span class="tag">'+esc(me.company||'')+'</span>'+(me.matched?'':' <span class="tag unv">ยังไม่ยืนยัน</span>');
+}
+function render(){
+  if(!BOOT||!S)return;
+  $('rbar').hidden=!(QUEUE.length&&VIEW==='form');$('rn').textContent=QUEUE.length;
+  if(VIEW==='queue')renderQueue();else renderForm();
+}
+function renderForm(){
+  var areas=BOOT.areas||[],subs=subAreasFor(S.area),types=BOOT.types||Object.keys(TYPE_META);
+  var h='';
+  h+='<div class="card"><div class="lbl"><span>วันที่ <small>Date</small></span></div><div class="datebox"><input class="inp show" value="'+esc(fmtDate(S.date))+'" readonly><input type="date" id="fDate" value="'+esc(S.date)+'" max="'+esc(BOOT.today)+'"></div></div>';
+  h+='<div class="card"><div class="lbl"><span>พื้นที่ <span class="req">*</span><small>Area</small></span></div><select id="fArea"><option value="">— เลือกพื้นที่ —</option>'+areas.map(function(a){return '<option'+(a===S.area?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
+  if(subs.length)h+='<div style="height:8px"></div><select id="fSub"><option value="">— จุดย่อย (ไม่บังคับ) —</option>'+subs.map(function(a){return '<option'+(a===S.subArea?' selected':'')+'>'+esc(a)+'</option>';}).join('')+'</select>';
+  h+='</div>';
+  h+='<div class="card"><div class="lbl"><span>ประเภท <span class="req">*</span><small>Observation Type</small></span></div><div class="tiles">'+types.map(function(t){var m=TYPE_META[t]||['',''];
+    return '<button type="button" class="tile'+(S.type===t?' on':'')+'" data-type="'+esc(t)+'" style="--tc:'+(m[1]||'var(--accent)')+'">'+esc(t)+'<small>'+esc(m[0])+'</small></button>';}).join('')+'</div></div>';
+  h+='<div class="card"><div class="lbl"><span>รูปที่พบ <span class="req">*</span><small>Photo · สูงสุด '+MAXP+'</small></span></div>'+photoRow('F',S.pf)+'</div>';
+  h+='<div class="card"><div class="lbl"><span>สิ่งที่พบเจอ <span class="req">*</span><small>What was found</small></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น พบคนทำงานบนที่สูงไม่คล้องเกี่ยว">'+esc(S.desc)+'</textarea></div>';
+  h+='<div class="card"><div class="lbl"><span>การแก้ไขที่ทำแล้ว <small>Action taken</small></span></div><textarea id="fAct" placeholder="แก้ไขหน้างานอย่างไร เช่น แจ้งหัวหน้างาน ให้คล้องเกี่ยวทันที">'+esc(S.act)+'</textarea></div>';
+  h+='<div class="card"><div class="lbl"><span>รูปหลังแก้ไข <small>After · ไม่บังคับ</small></span></div>'+photoRow('A',S.pa)+'</div>';
+  if(SAVED_FLASH)h='<div class="flash">✓ Saved · บันทึกแล้ว · กรอกใบต่อไปได้เลย</div>'+h;
+  $('scr').innerHTML=h;
+  renderFoot();
+  $('fDate').onchange=function(){S.date=this.value||BOOT.today;saveDraft();render();};
+  $('fArea').onchange=function(){S.area=this.value;S.subArea='';saveDraft();render();};
+  if($('fSub'))$('fSub').onchange=function(){S.subArea=this.value;saveDraft();};
+  $('fDesc').oninput=function(){S.desc=this.value;saveDraft();renderFoot();};
+  $('fAct').oninput=function(){S.act=this.value;saveDraft();};
+}
+function photoRow(g,arr){
+  var h='<div class="pho" data-g="'+g+'">';
+  arr.forEach(function(d,i){h+='<div class="th" style="background-image:url('+d+')"><b data-del="'+g+i+'">×</b></div>';});
+  if(arr.length<MAXP)h+='<button type="button" class="add" data-add="'+g+'">📷<br>'+(arr.length?'เพิ่มรูป':'ถ่ายรูป')+'</button>';
+  return h+'</div>';
+}
+function renderFoot(){
+  var f=$('foot');
+  if(VIEW==='queue'){f.innerHTML='<button class="btn ghost" id="more">+ Add More</button><button class="btn" id="sendall"'+(SENDING||!QUEUE.length?' disabled':'')+'>'+(SENDING?'Sending…':'Send All ('+QUEUE.length+')')+'</button>';
+    $('more').onclick=function(){VIEW='form';SAVED_FLASH=false;render();};$('sendall').onclick=sendAll;return;}
+  var m=missing();
+  f.innerHTML=(m.length?'<div class="miss"><b>ยังขาด</b>'+esc(m.join(' · '))+'</div>':'')+'<button class="btn" id="save"'+(m.length?' disabled':'')+'>Save</button>';
+  $('save').onclick=saveEntry;
+}
+function renderQueue(){
+  $('rbar').hidden=true;
+  var h='<div class="lbl" style="font-size:17px;margin-bottom:10px"><span>Ready to send ('+QUEUE.length+')</span><small>ยังไม่ส่ง จนกว่าจะกด Send All</small></div>';
+  if(SAVED_FLASH)h+='<div class="flash">✓ Saved · บันทึกแล้ว</div>';
+  if(!QUEUE.length)h+='<div class="hint" style="text-align:center;padding:30px 0">ยังไม่มีรายการ</div>';
+  QUEUE.slice().reverse().forEach(function(e,ri){var i=QUEUE.length-1-ri,m=TYPE_META[e.type]||['','var(--accent)'];
+    h+='<div class="qc"><div class="p" style="background-image:url('+(e.pf[0]||'')+')"></div><div><div class="h"><span class="ty" style="--tc:'+m[1]+'">'+esc(e.type)+'</span>'+esc(e.area)+(e.subArea?' · '+esc(e.subArea):'')+' · '+esc(fmtDate(e.date))+'</div><div class="x">'+esc(e.desc)+'</div></div>'+
+      '<div class="ac"><span data-edit="'+i+'">✎ Edit</span><span class="rm" data-rm="'+i+'">Remove</span></div></div>';});
+  $('scr').innerHTML=h;renderFoot();
+}
+
+/* ---------------- events ---------------- */
+var PICK='F';
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-type]');if(t){S.type=t.getAttribute('data-type');saveDraft();render();return;}
+  var a=e.target.closest('[data-add]');if(a){PICK=a.getAttribute('data-add');$('picker').value='';$('picker').click();return;}
+  var d=e.target.closest('[data-del]');if(d){var k=d.getAttribute('data-del');(k[0]==='F'?S.pf:S.pa).splice(+k.slice(1),1);saveDraft();render();return;}
+  var ed=e.target.closest('[data-edit]');if(ed){var i=+ed.getAttribute('data-edit');S=Object.assign(blank(),QUEUE[i]);QUEUE.splice(i,1);saveQueue();saveDraft();VIEW='form';SAVED_FLASH=false;render();return;}
+  var rm=e.target.closest('[data-rm]');if(rm){QUEUE.splice(+rm.getAttribute('data-rm'),1);saveQueue();render();return;}
+  if(e.target.closest('#rbar')){VIEW='queue';SAVED_FLASH=false;render();}
+});
+$('picker').addEventListener('change',function(){
+  var files=[].slice.call(this.files||[]);if(!files.length)return;
+  var arr=PICK==='F'?S.pf:S.pa,room=MAXP-arr.length;
+  files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);});});},Promise.resolve()).then(function(){saveDraft();render();});
+});
+function shrink(file){
+  return new Promise(function(res){
+    var fr=new FileReader();
+    fr.onload=function(){var img=new Image();img.onload=function(){
+      var w=img.width,h=img.height,r=Math.min(1,SHRINK/Math.max(w,h));w=Math.round(w*r);h=Math.round(h*r);
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+      res(cv.toDataURL('image/jpeg',JPEGQ));};img.onerror=function(){res(null);};img.src=fr.result;};
+    fr.onerror=function(){res(null);};fr.readAsDataURL(file);
+  });
+}
+
+/* ---------------- save / send ---------------- */
+function saveEntry(){
+  if(missing().length)return;
+  var e=Object.assign({},S,{ref:uid(),desc:S.desc.trim(),act:S.act.trim()});
+  QUEUE.push(e);saveQueue();
+  var keep={date:S.date,area:S.area,subArea:S.subArea};
+  S=Object.assign(blank(),keep);saveDraft();idbPut('draft',S);
+  VIEW='queue';SAVED_FLASH=true;render();
+}
+function payloadOf(e){return {clientRef:e.ref,reportDate:e.date,area:e.area,subArea:e.subArea||'',type:e.type,desc:e.desc,action:e.act||'',photos:e.pf.slice(),after:e.pa.slice()};}
+function overlay(on,t,s){$('overlay').classList.toggle('show',!!on);if(t)$('ovtxt').textContent=t;$('ovsub').textContent=s||'';}
+function sendAll(){
+  if(SENDING||!QUEUE.length)return;SENDING=true;renderFoot();
+  var total=QUEUE.length,sent=[],err='';
+  var finish=function(){SENDING=false;overlay(false);
+    if(!sent.length){render();$('scr').insertAdjacentHTML('afterbegin','<div class="err">ส่งไม่สำเร็จ: '+esc(err)+'</div>');return;}
+    LAST_SENT=sent;screenSent(sent,err?('ส่งแล้ว '+sent.length+' ใบ · ที่เหลือยังอยู่ใน Ready to send: '+err):'');};
+  var step=function(){
+    if(!QUEUE.length)return finish();
+    var p=payloadOf(QUEUE[0]);
+    overlay(true,'กำลังส่ง '+(sent.length+1)+' / '+total,(p.photos.length+p.after.length)+' รูป');
+    api('submit',{payload:p}).then(function(r){
+      if(!r||!r.ok){err=(r&&r.error)||'no response';return finish();}
+      sent.push({id:(r.data&&r.data.id)||'',counts:r.data&&r.data.counts});QUEUE.shift();saveQueue();step();
+    }).catch(function(){err='เน็ตหลุด — รายการที่เหลือยังอยู่ กด Send All อีกครั้งเมื่อมีสัญญาณ';finish();});
+  };
+  step();
+}
+start();
+</script>
+</body>
+</html>
