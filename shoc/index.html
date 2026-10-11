@@ -105,7 +105,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'shoc-page v0.2';
+var PAGE_VER = 'shoc-page v0.3';
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
 var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
   'Near Miss':['เหตุการณ์เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','#2E8F62'],
@@ -184,10 +184,9 @@ function screenRegister(r,err){
   bare('<img class="av" src="'+esc(r.picture||'')+'" alt="" onerror="this.style.visibility=\'hidden\'">'+
     '<h2 style="margin-top:12px">'+esc(r.lineName||'')+'</h2><p style="font-size:12.5px">ชื่อและรูปจาก LINE ของคุณ</p>'+
     '<div class="cobox"><span>บริษัท <small style="color:var(--muted)">(จากลิงก์)</small></span><b>'+esc(r.companyName||r.company)+'</b></div>'+
-    '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ครั้งเดียว · ไทยหรืออังกฤษ</small></span></div>'+
-    '<input class="inp" id="rn_name" placeholder="เช่น บุญมี สารบคง / Boonmee Sarbkong" autocomplete="name">'+
+    '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ชื่อไทยหรืออังกฤษ</small></span></div>'+
+    '<input class="inp" id="rn_name" placeholder="" autocomplete="name">'+
     (err?'<div class="err">'+esc(err)+'</div>':'')+
-    '<p style="font-size:12.5px;margin-top:10px">ครั้งต่อไปไม่ต้องทำขั้นตอนนี้อีก</p>'+
     '<button class="btn" id="rn_go" style="width:100%">เริ่มใช้งาน</button>');
   $('rn_go').onclick=function(){
     var n=($('rn_name').value||'').trim();if(n.length<3){screenRegister(r,'กรุณาพิมพ์ชื่อ-นามสกุลจริง');return;}
