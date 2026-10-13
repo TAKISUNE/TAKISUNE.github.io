@@ -38,6 +38,7 @@ body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;displ
 .appbar{flex:none;background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 14px;padding-top:calc(9px + env(safe-area-inset-top))}
 .who{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;min-height:20px}
 .who .vf{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:99px;background:var(--green-bg);color:var(--green-text);border:1px solid var(--green)}
+.who .ver{margin-left:auto;font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.02em}   /* 13 Oct 2026: page version, like SHOC — TK checks a phone has the new page */
 .who .frac{margin-left:auto;font-size:10.5px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
 .prog{margin-top:7px;height:2px;background:var(--track);border-radius:2px;overflow:hidden}
 .prog i{display:block;height:100%;width:0;background:var(--live);transition:width .25s}
@@ -213,6 +214,7 @@ var SHRINK   = 2048;       /* TK 26 Sep: LINE-like quality, still fast from site
 var JPEGQ    = 0.80;
 var OTYPES   = [['ua','Unsafe Action','การกระทำไม่ปลอดภัย'],['uc','Unsafe Condition','สภาพการณ์ไม่ปลอดภัย'],
                 ['env','Environment Impact','มีผลกระทบต่อสิ่งแวดล้อม'],['oth','Other','อื่นๆ — ระบุ']];
+var PAGE_VER = 'v3.1';   /* 13 Oct 2026 — bump on every upload (v3.1 = date resets to today on open) */
 var LS_DRAFT = 'line_obs_draft_v1', LS_OUT = 'line_obs_outbox_v1';
 
 var BOOT = null, TOKEN = '', S = null, SENDING = false;   /* v3 6 Oct 2026: queue (Save → Send All) */
@@ -273,6 +275,7 @@ function showForm(boot){
     QUEUE=Array.isArray(v[0])?v[0]:[];
     var d=lsGet(LS_DRAFT,null);
     S=v[1]?Object.assign(blank(),v[1]):((d&&d.v===1)?Object.assign(blank(),d.s):blank());
+    S.date=BOOT.today;   /* 13 Oct 2026: always today on open (like SHOC v0.7) — a restored draft must not carry yesterday's date; back-date is per entry only */
     $('appbar').hidden=false;$('foot').hidden=false;
     render();
     flushOutbox();
@@ -481,7 +484,7 @@ function queueHtml(){
 
 function render(){
   var me=BOOT.me||{};
-  $('who').innerHTML=esc(me.name||me.nick||'')+' <span class="vf">verified · LINE</span>';
+  $('who').innerHTML=esc(me.name||me.nick||'')+' <span class="vf">verified · LINE</span><span class="ver">'+PAGE_VER+'</span>';
   if(JUST_SAVED&&QUEUE.length){
     $('body').innerHTML='<div id="outnote"></div>'+(SAVED_FLASH?'<div class="savedok">✓ Saved · บันทึกแล้ว</div>':'')+queueHtml();
   }else{
