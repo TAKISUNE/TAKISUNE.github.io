@@ -197,7 +197,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'v0.8';   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
+var PAGE_VER = 'v0.8.1';   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
 var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
   'Near Miss':['เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','var(--blue)'],
@@ -346,6 +346,14 @@ function steps(){
 }
 /* Action Taken / Recommendation: required for every type except Good Practice */
 function needAct(){return S.type!=='Good Practice';}
+/* example text follows the chosen type (TK 14 Oct: a GP card must not show an unsafe example) */
+var EX={'Unsafe Action':['พบคนทำงานบนที่สูงไม่คล้องเกี่ยว','แจ้งให้คล้องเกี่ยวทันที และแจ้งหัวหน้างาน'],
+  'Unsafe Condition':['นั่งร้านไม่มีราวกันตก แผ่นกระดานหาย','แจ้งหัวหน้างานให้ติดตั้งราวกันตกก่อนใช้งาน'],
+  'Near Miss':['รอกโซ่หลุด วัสดุร่วงใกล้คนงาน ไม่มีผู้บาดเจ็บ','หยุดงาน ตรวจสอบรอก และกั้นพื้นที่ด้านล่าง'],
+  'Environment Impact':['น้ำมันรั่วลงพื้นดิน ไม่มีถาดรอง','วางถาดรอง และเก็บดินที่ปนเปื้อน'],
+  'Good Practice':['คนงานคล้องเกี่ยวเข็มขัดนิรภัยถูกต้องขณะทำงานบนที่สูง','ควรขยายผลวิธีนี้ไปทุกพื้นที่'],
+  'Other':['อธิบายสิ่งที่พบ','แก้ไขแล้วอย่างไร หรือควรแก้ไขอย่างไร']};
+function ex(i){var e=EX[S.type];return e?e[i]:['พบคนทำงานบนที่สูงไม่คล้องเกี่ยว','แจ้งหัวหน้างานให้คล้องเกี่ยวทันที'][i];}
 function missing(){
   var m=[];
   if(!S.area)m.push('พื้นที่');else if(S.area==='Other'&&!(S.subArea||'').trim())m.push('ระบุพื้นที่');else if(S.subOther&&!(S.subArea||'').trim())m.push('ระบุจุดย่อย');
@@ -382,10 +390,10 @@ function renderForm(){
   if(S.type==='Other')h+='<input class="inp sub2" id="fTypeOther" placeholder="ระบุประเภท เช่น Security, Housekeeping" value="'+esc(S.typeOther||'')+'">';
   h+='</div>';
   h+='<div class="card" id="cPhoto"><div class="lbl"><span>รูปที่พบ <small>Photo · สูงสุด '+MAXP+'</small><span class="req">*</span></span></div>'+photoRow('F',S.pf)+'</div>';
-  h+='<div class="card" id="cDesc"><div class="lbl"><span>สิ่งที่พบเจอ <small>What was found</small><span class="req">*</span></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น พบคนทำงานบนที่สูงไม่คล้องเกี่ยว">'+esc(S.desc)+'</textarea></div>';
+  h+='<div class="card" id="cDesc"><div class="lbl"><span>สิ่งที่พบเจอ <small>What was found</small><span class="req">*</span></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น '+esc(ex(0))+'">'+esc(S.desc)+'</textarea></div>';
   h+=needAct()
-    ?'<div class="card" id="cAct"><div class="lbl"><span>การแก้ไข / ข้อเสนอแนะ <small>Action / Recommendation</small><span class="req">*</span></span></div><textarea id="fAct" placeholder="แก้ไขแล้วอย่างไร หรือควรแก้ไขอย่างไร เช่น แจ้งหัวหน้างานให้คล้องเกี่ยวทันที">'+esc(S.act)+'</textarea></div>'
-    :'<div class="card" id="cAct"><div class="lbl"><span>ข้อเสนอแนะ <small>Recommendation · ไม่บังคับ</small></span></div><textarea id="fAct" placeholder="ถ้ามี เช่น ควรขยายผลวิธีนี้ไปทุกพื้นที่">'+esc(S.act)+'</textarea></div>';
+    ?'<div class="card" id="cAct"><div class="lbl"><span>การแก้ไข / ข้อเสนอแนะ <small>Action / Recommendation</small><span class="req">*</span></span></div><textarea id="fAct" placeholder="แก้ไขแล้วอย่างไร หรือควรแก้ไขอย่างไร เช่น '+esc(ex(1))+'">'+esc(S.act)+'</textarea></div>'
+    :'<div class="card" id="cAct"><div class="lbl"><span>ข้อเสนอแนะ <small>Recommendation · ไม่บังคับ</small></span></div><textarea id="fAct" placeholder="ถ้ามี เช่น '+esc(ex(1))+'">'+esc(S.act)+'</textarea></div>';
   h+='<div class="card"><div class="lbl"><span>รูปหลังแก้ไข <small>After · ไม่บังคับ</small></span></div>'+photoRow('A',S.pa)+'</div>';
   if(SAVED_FLASH)h='<div class="flash">✓ Saved · บันทึกแล้ว · กรอกใบต่อไปได้เลย</div>'+h;
   $('scr').innerHTML=h;
