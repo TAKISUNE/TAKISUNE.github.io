@@ -197,7 +197,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'v0.7';
+var PAGE_VER = 'v0.8';   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
 var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
   'Near Miss':['เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','var(--blue)'],
@@ -342,14 +342,17 @@ function steps(){
     {id:'cArea',need:!S.area?'พื้นที่':(S.area==='Other'&&!(S.subArea||'').trim())?'ระบุพื้นที่':(S.subOther&&!(S.subArea||'').trim())?'ระบุจุดย่อย':''},
     {id:'cType',need:!S.type?'ประเภท':(S.type==='Other'&&!(S.typeOther||'').trim())?'ระบุประเภท':''},
     {id:'cPhoto',need:S.pf.length?'':'รูป'},
-    {id:'cDesc',need:S.desc.trim().length<3?'สิ่งที่พบเจอ':''}];
+    {id:'cDesc',need:S.desc.trim().length<3?'สิ่งที่พบเจอ':''}].concat(needAct()?[{id:'cAct',need:(S.act||'').trim().length<3?'การแก้ไข':''}]:[]);
 }
+/* Action Taken / Recommendation: required for every type except Good Practice */
+function needAct(){return S.type!=='Good Practice';}
 function missing(){
   var m=[];
   if(!S.area)m.push('พื้นที่');else if(S.area==='Other'&&!(S.subArea||'').trim())m.push('ระบุพื้นที่');else if(S.subOther&&!(S.subArea||'').trim())m.push('ระบุจุดย่อย');
   if(!S.type)m.push('ประเภท');else if(S.type==='Other'&&!(S.typeOther||'').trim())m.push('ระบุประเภท');
   if(!S.pf.length)m.push('รูป');
   if(S.desc.trim().length<3)m.push('สิ่งที่พบเจอ');
+  if(needAct()&&(S.act||'').trim().length<3)m.push('การแก้ไข');
   return m;
 }
 
@@ -380,7 +383,9 @@ function renderForm(){
   h+='</div>';
   h+='<div class="card" id="cPhoto"><div class="lbl"><span>รูปที่พบ <small>Photo · สูงสุด '+MAXP+'</small><span class="req">*</span></span></div>'+photoRow('F',S.pf)+'</div>';
   h+='<div class="card" id="cDesc"><div class="lbl"><span>สิ่งที่พบเจอ <small>What was found</small><span class="req">*</span></span></div><textarea id="fDesc" placeholder="พิมพ์หรือกดไมค์พูด เช่น พบคนทำงานบนที่สูงไม่คล้องเกี่ยว">'+esc(S.desc)+'</textarea></div>';
-  h+='<div class="card"><div class="lbl"><span>การแก้ไขที่ทำแล้ว <small>Action taken</small></span></div><textarea id="fAct" placeholder="แก้ไขหน้างานอย่างไร เช่น แจ้งหัวหน้างาน ให้คล้องเกี่ยวทันที">'+esc(S.act)+'</textarea></div>';
+  h+=needAct()
+    ?'<div class="card" id="cAct"><div class="lbl"><span>การแก้ไข / ข้อเสนอแนะ <small>Action / Recommendation</small><span class="req">*</span></span></div><textarea id="fAct" placeholder="แก้ไขแล้วอย่างไร หรือควรแก้ไขอย่างไร เช่น แจ้งหัวหน้างานให้คล้องเกี่ยวทันที">'+esc(S.act)+'</textarea></div>'
+    :'<div class="card" id="cAct"><div class="lbl"><span>ข้อเสนอแนะ <small>Recommendation · ไม่บังคับ</small></span></div><textarea id="fAct" placeholder="ถ้ามี เช่น ควรขยายผลวิธีนี้ไปทุกพื้นที่">'+esc(S.act)+'</textarea></div>';
   h+='<div class="card"><div class="lbl"><span>รูปหลังแก้ไข <small>After · ไม่บังคับ</small></span></div>'+photoRow('A',S.pa)+'</div>';
   if(SAVED_FLASH)h='<div class="flash">✓ Saved · บันทึกแล้ว · กรอกใบต่อไปได้เลย</div>'+h;
   $('scr').innerHTML=h;
@@ -392,7 +397,7 @@ function renderForm(){
   if($('fAreaOther'))$('fAreaOther').oninput=function(){S.subArea=this.value;saveDraft();renderFoot();};
   if($('fTypeOther'))$('fTypeOther').oninput=function(){S.typeOther=this.value;saveDraft();renderFoot();};
   $('fDesc').oninput=function(){S.desc=this.value;saveDraft();renderFoot();};
-  $('fAct').oninput=function(){S.act=this.value;saveDraft();};
+  $('fAct').oninput=function(){S.act=this.value;saveDraft();renderFoot();};
 }
 function photoRow(g,arr){
   var h='<div class="pho" data-g="'+g+'">';
