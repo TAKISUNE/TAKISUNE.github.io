@@ -202,7 +202,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'v0.9';   /* 15 Oct: add-friend banner · chat receipt only from OA menu (?src=menu) */
+var PAGE_VER = 'v0.10';   /* 15 Oct: no company link → pick company at registration (one QR for all; TK verifies) */ //   /* 15 Oct: add-friend banner · chat receipt only from OA menu (?src=menu) */
 var OA_ADD_URL = 'https://line.me/R/ti/p/@317edviz';   /* GMTP Subcon SHOC */
 var FRIEND = null;   /* null = unknown, true/false from liff.getFriendship() */   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
@@ -306,15 +306,25 @@ function screenError(t,msg){bare('<div class="big">⚠️</div><h2>'+esc(t)+'</h
 function screenRegister(r,err){
   bare('<img class="av" src="'+esc(r.picture||'')+'" alt="" onerror="this.style.visibility=\'hidden\'">'+
     '<h2 style="margin-top:12px">'+esc(r.lineName||'')+'</h2><p style="font-size:12.5px">ชื่อและรูปจาก LINE ของคุณ</p>'+
-    '<div class="cobox"><span>บริษัท <small style="color:var(--muted)">(จากลิงก์)</small></span><b>'+esc(r.companyName||r.company)+'</b></div>'+
+    (r.company?'<div class="cobox"><span>บริษัท <small style="color:var(--muted)">(จากลิงก์)</small></span><b>'+esc(r.companyName||r.company)+'</b></div>':
+      '<div class="lbl" style="text-align:left"><span>บริษัท <small>เลือกบริษัทที่คุณสังกัด</small></span></div>'+
+      '<select id="rn_co"><option value="">— เลือกบริษัท —</option>'+(r.companies||[]).map(function(c){return '<option value="'+esc(c.code)+'"'+(c.code===r._co?' selected':'')+'>'+esc(c.code+(c.name&&c.name!==c.code?' · '+c.name:''))+'</option>';}).join('')+'<option value="OTHER"'+(r._co==='OTHER'?' selected':'')+'>อื่นๆ (Other) — ระบุ</option></select>'+
+      '<input class="inp" id="rn_coname" placeholder="พิมพ์ชื่อบริษัท" value="'+esc(r._coname||'')+'" style="margin-top:8px'+(r._co==='OTHER'?'':';display:none')+'">'+
+      '<div style="height:12px"></div>')+
     '<div class="lbl" style="text-align:left"><span>ชื่อ-นามสกุลจริง <small>พิมพ์ชื่อไทยหรืออังกฤษก็ได้</small></span></div>'+
-    '<input class="inp" id="rn_name" placeholder="" autocomplete="name">'+
+    '<input class="inp" id="rn_name" placeholder="" autocomplete="name" value="'+esc(r._name||'')+'">'+
     (err?'<div class="err">'+esc(err)+'</div>':'')+
     '<button class="btn" id="rn_go" style="width:100%;margin-top:16px">เริ่มใช้งาน</button>');
+  if($('rn_co'))$('rn_co').onchange=function(){var o=$('rn_coname');o.style.display=this.value==='OTHER'?'':'none';if(this.value==='OTHER')o.focus();};
   $('rn_go').onclick=function(){
-    var n=($('rn_name').value||'').trim();if(n.length<3){screenRegister(r,'กรุณาพิมพ์ชื่อ-นามสกุลจริง');return;}
+    var co=r.company?'':(($('rn_co')||{}).value||''),coName=(($('rn_coname')||{}).value||'').trim();
+    var n=($('rn_name').value||'').trim();
+    Object.assign(r,{_name:n,_co:co,_coname:coName});
+    if(!r.company&&!co){screenRegister(r,'กรุณาเลือกบริษัท');return;}
+    if(co==='OTHER'&&coName.length<2){screenRegister(r,'กรุณาพิมพ์ชื่อบริษัท');return;}
+    if(n.length<3){screenRegister(r,'กรุณาพิมพ์ชื่อ-นามสกุลจริง');return;}
     this.disabled=true;this.textContent='กำลังลงทะเบียน…';
-    api('register',{c:INVITE,name:n}).then(function(x){
+    api('register',{c:r.company?INVITE:'',co:co,coName:co==='OTHER'?coName:'',name:n}).then(function(x){
       if(!x||!x.ok){screenRegister(r,(x&&x.error)||'no response');return;}
       lsSet(LS_BOOTC,null);showForm(x.boot);
     }).catch(function(){screenRegister(r,'เน็ตหลุด ลองใหม่อีกครั้ง');});
