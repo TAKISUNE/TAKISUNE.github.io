@@ -36,6 +36,10 @@ body{background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;displ
 .appbar .who{font-size:12.5px;opacity:.92;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 7px;border-radius:99px;background:rgba(255,255,255,.22)}
 .tag.unv{background:var(--warn);color:#fff}
+.fbar{flex:none;background:var(--warn-bg);color:var(--ink,inherit);font-size:13px;padding:9px 12px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border)}
+.fbar b{display:block;font-size:13.5px}.fbar span{flex:1;line-height:1.35}
+.fbar button{flex:none;border:0;border-radius:99px;background:#06C755;color:#fff;font-weight:700;font-size:13px;padding:8px 14px}
+.fbar .x{background:transparent;color:inherit;opacity:.6;padding:4px 6px;font-size:16px}
 .rbar{flex:none;background:var(--accent-bg);color:var(--accent-text);font-weight:600;font-size:13.5px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);cursor:pointer}
 #scr{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 24px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
@@ -185,6 +189,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
   <div class="t"><span>Safety Hazard Observation Card</span><small id="ver"></small></div>
   <div class="who" id="who"></div>
 </div>
+<div class="fbar" id="fbar" hidden><span><b>เพิ่มเพื่อน GMTP Subcon SHOC</b>เปิดฟอร์มจากแชทได้ทุกครั้ง + รับใบยืนยัน</span><button type="button" id="fbAdd">เพิ่มเพื่อน</button><button type="button" class="x" id="fbX" aria-label="ปิด">✕</button></div>
 <div class="rbar" id="rbar" hidden><span>Ready to send (<span id="rn">0</span>)</span><span>View ›</span></div>
 <div id="scr"><div class="boot" id="bootbox"><div class="sp"></div><div id="bootmsg">กำลังเข้าสู่ระบบด้วย LINE…</div><div style="font-size:11px;margin-top:6px" id="boott"></div></div></div>
 <div class="foot" id="foot" hidden></div>
@@ -197,7 +202,9 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'v0.8.1';   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
+var PAGE_VER = 'v0.9';   /* 15 Oct: add-friend banner · chat receipt only from OA menu (?src=menu) */
+var OA_ADD_URL = 'https://line.me/R/ti/p/@317edviz';   /* GMTP Subcon SHOC */
+var FRIEND = null;   /* null = unknown, true/false from liff.getFriendship() */   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
 var TYPE_META = {'Unsafe Action':['การกระทำไม่ปลอดภัย','var(--crit)'],'Unsafe Condition':['สภาพการณ์ไม่ปลอดภัย','var(--warn)'],
   'Near Miss':['เกือบเกิดอุบัติเหตุ','#8E5BBF'],'Environment Impact':['ผลกระทบสิ่งแวดล้อม','var(--blue)'],
@@ -221,6 +228,30 @@ function inviteCode(){
   try{var st=/[?&]liff\.state=([^&#]+)/.exec(location.search||'');if(st){var q=decodeURIComponent(st[1]);var m2=/[?&]?c=([^&#]+)/.exec(q);if(m2)return decodeURIComponent(m2[1]);}}catch(e){}
   return lsGet('shoc_invite','')||'';
 }
+/* v0.9: true only when opened from the OA rich menu (link ends ?src=menu). Only then does the page
+   post its "ส่ง SHOC แล้ว" line into the chat — opened from a group or a 1:1 with someone else,
+   liff.sendMessages would post into THAT chat. */
+function fromMenu(){
+  if(/[?&]src=menu\b/.test(location.search||''))return true;
+  try{var st=/[?&]liff\.state=([^&#]+)/.exec(location.search||'');if(st&&/[?&]?src=menu\b/.test(decodeURIComponent(st[1])))return true;}catch(e){}
+  return false;
+}
+function checkFriend(){
+  try{
+    if(!(window.liff&&liff.getFriendship))return;
+    liff.getFriendship().then(function(f){FRIEND=!!(f&&f.friendFlag);showFriendBar();}).catch(function(){FRIEND=null;});
+  }catch(e){}
+}
+function showFriendBar(){
+  var b=$('fbar');if(!b)return;
+  var snooze=+lsGet('shoc_fb_snooze',0)||0;
+  b.hidden=!(FRIEND===false&&BOOT&&Date.now()>snooze);
+}
+$('fbAdd').onclick=function(){
+  try{if(window.liff&&liff.isInClient&&liff.isInClient()){liff.openWindow({url:OA_ADD_URL,external:false});}else{location.href=OA_ADD_URL;}}catch(e){location.href=OA_ADD_URL;}
+};
+$('fbX').onclick=function(){lsSet('shoc_fb_snooze',Date.now()+864e5);$('fbar').hidden=true;};
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&FRIEND===false)checkFriend();});
 
 var _tokOk,TOKEN_P=new Promise(function(r){_tokOk=r;});
 function api(action, extra){return TOKEN_P.then(function(){
@@ -239,7 +270,7 @@ function start(){
   if(c&&c.boot&&c.at&&(Date.now()-c.at)<14*864e5){FAST=c.sub||true;showForm(Object.assign({},c.boot,{today:todayBKK()}));}
   liff.init({liffId:LIFF_ID}).then(function(){
     if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
-    TOKEN=liff.getIDToken()||'';_tokOk();
+    TOKEN=liff.getIDToken()||'';_tokOk();checkFriend();
     var sub='';try{sub=(liff.getDecodedIDToken()||{}).sub||'';}catch(e){}
     if(FAST&&FAST!==true&&sub&&FAST!==sub){FAST=false;lsSet(LS_BOOTC,null);location.reload();return;}
     bootStep('กำลังโหลดฟอร์ม…');
@@ -265,7 +296,7 @@ function showForm(boot){
     S=v[1]?Object.assign(blank(),v[1]):(d?Object.assign(blank(),d):blank());
     S.date=BOOT.today;   /* v0.7: always today on open — back-date is per entry only */
     $('appbar').hidden=false;$('foot').hidden=false;$('ver').textContent=PAGE_VER;$('scr').className='';
-    renderWho();render();
+    renderWho();render();showFriendBar();
   });
 }
 
@@ -313,6 +344,7 @@ function screenSent(sent,err){
 function chatReceipt(sent){
   try{
     if(!(window.liff&&liff.isInClient&&liff.isInClient()&&liff.sendMessages))return;
+    if(!fromMenu())return;   /* v0.9 */
     var ids=sent.map(function(x){return x.id;}).filter(String);
     var txt='ส่ง SHOC แล้ว '+sent.length+' ใบ · '+(ids.length>3?ids[0]+' … '+ids[ids.length-1]:ids.join(' · '));
     liff.sendMessages([{type:'text',text:txt}]).catch(function(){});
