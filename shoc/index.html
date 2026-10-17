@@ -61,6 +61,12 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 .pho .th b{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--crit);color:#fff;font-size:13px;line-height:22px;text-align:center;border:2px solid var(--card)}
 .pho .add{width:76px;height:76px;border-radius:10px;border:1.5px dashed var(--accent);background:var(--accent-bg);color:var(--accent-text);font:inherit;font-size:12px;font-weight:600;line-height:1.2}
 .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.perr{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;padding-right:64px;font-size:13.5px;margin:0 0 10px;position:relative;line-height:1.45}
+.perr b{display:block;font-size:14.5px}
+.perr span{display:block}
+.perr .tip{margin-top:6px}
+.perr button{position:absolute;right:8px;top:8px;border:1px solid var(--warn);background:transparent;color:var(--warn);border-radius:8px;padding:3px 10px;font:inherit;font-size:12.5px}
+.pho .add[disabled]{opacity:.65}
 .foot{flex:none;background:var(--card);border-top:1px solid var(--border);padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center}
 .btn{flex:1;border:0;border-radius:12px;padding:14px 10px;font:inherit;font-size:16px;font-weight:700;background:var(--accent);color:var(--accent-ink)}
 #foot #save{flex:none;min-width:42%}
@@ -202,7 +208,7 @@ select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(
 /* ---------------- config (none of these are secrets) ---------------- */
 var LIFF_ID = '2011968635-5GzDB8TW';   /* from LINE Developers → LIFF; also Config.LIFF_ID */
 var API     = 'https://script.google.com/macros/s/AKfycbwQ97v5MGhcSEMkLJgMDVs3SMmfsZsN8POhC03yq7wZZwq0BqCNZdSELNQspFShDsF0/exec';
-var PAGE_VER = 'v0.10';   /* 15 Oct: no company link → pick company at registration (one QR for all; TK verifies) */ //   /* 15 Oct: add-friend banner · chat receipt only from OA menu (?src=menu) */
+var PAGE_VER = 'v0.11';   /* 17 Oct: photo picker — HEIC auto-convert (heic2any, lazy) · objectURL decode + createImageBitmap fallback · visible error banner instead of silent drop */ //   /* 15 Oct: no company link → pick company at registration (one QR for all; TK verifies) */ //   /* 15 Oct: add-friend banner · chat receipt only from OA menu (?src=menu) */
 var OA_ADD_URL = 'https://line.me/R/ti/p/@317edviz';   /* GMTP Subcon SHOC */
 var FRIEND = null;   /* null = unknown, true/false from liff.getFriendship() */   /* 14 Oct: Action Taken / Recommendation required except Good Practice */
 var MAXP = 4, SHRINK = 2048, JPEGQ = 0.80;
@@ -450,10 +456,13 @@ function renderForm(){
   $('fAct').oninput=function(){S.act=this.value;saveDraft();renderFoot();};
 }
 function photoRow(g,arr){
-  var h='<div class="pho" data-g="'+g+'">';
+  var h='',pe=PHOTO_ERR[g];
+  if(pe)h+='<div class="perr"><b>⚠️ '+(pe.n>1?'เปิดไม่ได้ '+pe.n+' รูป':'รูปนี้เปิดไม่ได้')+'</b><span>'+esc(pe.line)+'</span><span class="tip">วิธีแก้: ถ่ายรูปใหม่ หรือแคปหน้าจอรูปนั้นแล้วเลือกแทน</span><button type="button" data-perrx="'+g+'">ปิด</button></div>';
+  h+='<div class="pho" data-g="'+g+'">';
   var mx=metaArr(g);
   arr.forEach(function(d,i){h+='<div class="th" style="background-image:url('+d+')">'+(mx[i]?'<span class="edtag">แก้ไขแล้ว</span>':'')+'<button type="button" class="edbtn" data-ed="'+g+'" data-i="'+i+'"><span>✎ '+(mx[i]?'แก้อีก':'Edit')+'</span></button><b data-del="'+g+i+'">×</b></div>';});
-  if(arr.length<MAXP)h+='<button type="button" class="add" data-add="'+g+'">📷<br>'+(arr.length?'เพิ่มรูป':'เลือกรูปภาพ')+'</button>';
+  if(BUSY[g])h+='<button type="button" class="add" disabled>⏳<br>กำลังเตรียมรูป…</button>';
+  else if(arr.length<MAXP)h+='<button type="button" class="add" data-add="'+g+'">📷<br>'+(arr.length?'เพิ่มรูป':'เลือกรูปภาพ')+'</button>';
   return h+'</div>';
 }
 function renderFoot(){
@@ -481,6 +490,7 @@ function renderQueue(){
 var PICK='F';
 document.addEventListener('click',function(e){
   var t=e.target.closest('[data-type]');if(t){S.type=t.getAttribute('data-type');if(S.type!=='Other')S.typeOther='';saveDraft();render();return;}
+  var px=e.target.closest('[data-perrx]');if(px){PHOTO_ERR[px.getAttribute('data-perrx')]=null;render();return;}
   var a=e.target.closest('[data-add]');if(a){PICK=a.getAttribute('data-add');$('picker').value='';$('picker').click();return;}
   var ed0=e.target.closest('[data-ed]');if(ed0){PE.open(ed0.getAttribute('data-ed'),+ed0.getAttribute('data-i'));return;}
   var d=e.target.closest('[data-del]');if(d){var k=d.getAttribute('data-del'),ix=+k.slice(1);(k[0]==='F'?S.pf:S.pa).splice(ix,1);metaArr(k[0]).splice(ix,1);saveDraft();render();return;}
@@ -489,20 +499,59 @@ document.addEventListener('click',function(e){
   var j=e.target.closest('[data-jump]');if(j){var c=$(j.getAttribute('data-jump'));if(c){c.scrollIntoView({behavior:'smooth',block:'start'});var fo=c.querySelector('input:not([type=date]),textarea,select');if(fo&&fo.id!=='fArea'&&fo.id!=='fSub')setTimeout(function(){fo.focus();},350);}return;}
   if(e.target.closest('#rbar')){VIEW='queue';SAVED_FLASH=false;render();}
 });
+var PHOTO_ERR={F:null,A:null},BUSY={F:0,A:0};
 $('picker').addEventListener('change',function(){
   var files=[].slice.call(this.files||[]);if(!files.length)return;
-  var arr=PICK==='F'?S.pf:S.pa,room=MAXP-arr.length;
-  files.slice(0,room).reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);});});},Promise.resolve()).then(function(){saveDraft();render();});
+  var g=PICK,arr=g==='F'?S.pf:S.pa,take=files.slice(0,MAXP-arr.length),errs=[];
+  PHOTO_ERR[g]=null;BUSY[g]=take.length;render();
+  take.reduce(function(p,f){return p.then(function(){return shrink(f).then(function(d){if(d)arr.push(d);else errs.push(f);BUSY[g]=Math.max(0,BUSY[g]-1);render();});});},Promise.resolve())
+  .then(function(){BUSY[g]=0;if(errs.length)PHOTO_ERR[g]=errInfo(errs[0],errs.length);saveDraft();render();});
 });
-function shrink(file){
+var HEIC_URL='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js',heicP=null;
+function loadHeic(){
+  if(window.heic2any)return Promise.resolve(window.heic2any);
+  if(!heicP)heicP=new Promise(function(res,rej){var sc=document.createElement('script');sc.src=HEIC_URL;
+    sc.onload=function(){window.heic2any?res(window.heic2any):rej(new Error('heic2any missing'));};
+    sc.onerror=function(){heicP=null;rej(new Error('heic2any load failed'));};document.head.appendChild(sc);});
+  return heicP;
+}
+function sniffHeic(file){
+  if(/image\/hei[cf]/i.test(file.type||'')||/\.hei[cf]$/i.test(file.name||''))return Promise.resolve(true);
+  if(!file.slice||!window.FileReader)return Promise.resolve(false);
+  return new Promise(function(res){var fr=new FileReader();
+    fr.onload=function(){try{var b=new Uint8Array(fr.result),t=String.fromCharCode.apply(null,b);
+      res(t.substr(4,4)==='ftyp'&&/^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/.test(t.substr(8,4)));}catch(e){res(false);}};
+    fr.onerror=function(){res(false);};fr.readAsArrayBuffer(file.slice(0,16));});
+}
+function drawScaled(src,w,h){
+  if(!w||!h)return null;
+  var r=Math.min(1,SHRINK/Math.max(w,h)),cv=document.createElement('canvas');
+  cv.width=Math.round(w*r);cv.height=Math.round(h*r);cv.getContext('2d').drawImage(src,0,0,cv.width,cv.height);
+  var d=cv.toDataURL('image/jpeg',JPEGQ);cv.width=cv.height=0;return d&&d.length>200?d:null;
+}
+function decodeImg(blob){   /* objectURL: no base64 copy of a 10-20 MB original → less memory than FileReader dataURL */
   return new Promise(function(res){
-    var fr=new FileReader();
-    fr.onload=function(){var img=new Image();img.onload=function(){
-      var w=img.width,h=img.height,r=Math.min(1,SHRINK/Math.max(w,h));w=Math.round(w*r);h=Math.round(h*r);
-      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
-      res(cv.toDataURL('image/jpeg',JPEGQ));};img.onerror=function(){res(null);};img.src=fr.result;};
-    fr.onerror=function(){res(null);};fr.readAsDataURL(file);
-  });
+    var u,img=new Image();try{u=URL.createObjectURL(blob);}catch(e){return res(null);}
+    img.onload=function(){var d=null;try{d=drawScaled(img,img.naturalWidth,img.naturalHeight);}catch(e){}URL.revokeObjectURL(u);res(d);};
+    img.onerror=function(){URL.revokeObjectURL(u);res(null);};img.src=u;});
+}
+function decodeBitmap(blob){
+  if(!window.createImageBitmap)return Promise.resolve(null);
+  return createImageBitmap(blob,{imageOrientation:'from-image'}).then(function(bm){var d=null;try{d=drawScaled(bm,bm.width,bm.height);}catch(e){}if(bm.close)bm.close();return d;}).catch(function(){return null;});
+}
+function decode(blob){return decodeImg(blob).then(function(d){return d||decodeBitmap(blob);});}
+function shrink(file){
+  return sniffHeic(file).then(function(isH){
+    file._heic=isH;
+    if(!isH)return decode(file);
+    return loadHeic().then(function(h2a){return h2a({blob:file,toType:'image/jpeg',quality:0.9});})
+      .then(function(out){return decode(Array.isArray(out)?out[0]:out);});
+  }).catch(function(e){try{console.warn('shrink failed',file&&file.name,file&&file.type,file&&file.size,e);}catch(_){}return null;});
+}
+function errInfo(f,n){
+  var mb=(f.size||0)/1048576,kind=f._heic?'HEIC':(((/\.([a-z0-9]{2,5})$/i.exec(f.name||'')||[])[1])||((f.type||'').split('/')[1])||'ไม่ทราบชนิด');
+  var line=!f.size?'ไฟล์ว่าง (0 MB) · รูปอาจยังอยู่บน cloud ไม่ได้โหลดลงเครื่อง':'ไฟล์ '+String(kind).toUpperCase()+' · '+(mb<0.1?'<0.1':mb.toFixed(1))+' MB';
+  return {n:n,line:line};
 }
 
 /* ---------------- save / send ---------------- */
